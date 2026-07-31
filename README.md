@@ -108,7 +108,7 @@ Pick for your preferred package manager:
 
 ## Details
 
-With [git-to-changelog](#git-to-changelog) there already was a very good solution, but due to a hardwired search path '../../package.json' - mimicking npm's way of structuring a `node_modules` folder - one that does not work with pnpm.
+With [git-to-changelog](#git-to-changelog) there already was a very good solution, but due to a hardwired search path '../../package.json' - mimicking npm's way of structuring a `node_modules` folder - one that does not work with pnpm, and in that turn some other little things were fixed (see [CHANGELOG](https://github.com/hh-lohmann/commits-to-changelog/blob/release/CHANGELOG.md)).
 
 
 ## Source Code

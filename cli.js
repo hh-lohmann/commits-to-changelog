@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const { spawnSync } = require('node:child_process');
+
 let fs = require("fs"),
     exec = require("child_process").exec,
     comparePkgVersion = require("compare-versions"),
@@ -8,9 +10,23 @@ let fs = require("fs"),
     commitURI,
     out;
 
-if (pkg.homepage) {
-  let dir = (pkg.homepage.includes("bitbucket") ? "/commits/" : "/commit/");
-  commitURI = pkg.homepage + dir;
+const _getRemoteRepoUrl=function(){
+  const myBranch=spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
+  if(!myBranch) throw Error(progName+': Could not get name of current branch');
+  const myRemote=spawnSync('git',['config','branch.'+myBranch+'.remote'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
+  if(!myRemote) throw Error(progName+': Could not get remote name for current branch');
+  const myUrl=spawnSync('git',['remote','get-url',myRemote],{encoding:'utf8'}).stdout.replace(/\s/g,'');
+  if(!myUrl) throw Error(progName+': Could not get remote URL for current branch');
+  return myUrl;
+}
+
+const progName='commits-to-changelog';
+const remoteRepoUrl=_getRemoteRepoUrl();
+
+
+if (remoteRepoUrl) {
+  let dir = (remoteRepoUrl.includes("bitbucket") ? "/commits/" : "/commit/");
+  commitURI = remoteRepoUrl + dir;
 }
 
 checkArgs()
