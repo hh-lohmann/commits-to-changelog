@@ -167,6 +167,15 @@ function handleFirstCommitVersion(formattedCommits) {
         latestTag = tag[1].trim();
       }
 
+      if(!pkgVers) return rej('The package.json for the current project does not contain a version key');
+
+      try{
+        comparePkgVersion(pkgVers, latestTag)
+      }
+      catch(err){
+        return rej(`Your package version (${pkgVers}) cannot be processed: ${err.message}`);
+      }
+
       if (comparePkgVersion(pkgVers, latestTag) === -1) {
         return rej(`Your package version (${pkgVers}) has a SemVer value that falls before your latest tag (${latestTag}).`);
       }
