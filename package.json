@@ -1,0 +1,37 @@
+{
+  "name": "commits-to-changelog",
+  "description": "Create an unopionated CHANGELOG.md from the Git commit history of Node packages",
+  "author": {
+    "name": "hh lohmann",
+    "email": "hh.lohmann@gmail.com"
+  },
+  "version": "1.0.0",
+  "keywords": [
+    "changelog",
+    "log",
+    "git",
+    "changes",
+    "history",
+    "commit",
+    "commits",
+    "tags",
+    "auto",
+    "automatic",
+    "bitbucket",
+    "gitlab",
+    "cli"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hh-lohmann/commits-to-changelog.git"
+  },
+  "bugs": "https://github.com/hh-lohmann/commits-to-changelog/issues",
+  "homepage": "https://hh-lohmann.github.io/commits-to-changelog",
+  "bin": {
+    "commits-to-changelog": "cli.js"
+  },
+  "dependencies": {
+    "compare-versions": "^3.6.0"
+  }
+}

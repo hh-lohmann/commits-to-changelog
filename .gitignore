@@ -1,0 +1,61 @@
+# Generalized ignores
+# ! Delete predefined entries only if you know what you are doing
+# => Superfluous entries are less harmful than missing ones
+
+# ! Note that exclusion for privacy (= not exposing sensitive contents to remotes) has always to be defined per case
+
+# - Sorted by pattern, not by file sources
+# - Same files / patterns may be emitted by different sources
+# - Patterns are sorted by complete folders > single files
+#   - single files may have a folder path, so this order should make clearer "complete folder" or just "some file(s) in folder"
+# - dot files / folders are sorted before regular files / folders
+#   - i.e. considering "." as part of filename, not like "extension only"
+
+
+# ad hoc tests
+*testo*.*
+
+# Deno JS runtime
+/.deno
+
+# GitHub Pages / Jekyll
+/.jekyll-cache
+
+# GitHub Pages / Jekyll
+/.sass-cache
+
+# GitHub Pages / Jekyll
+/_site
+
+# Git worktree sub-directory (arbitrary naming-convention)
+/00_wt_*
+
+# div.
+/build
+
+# Deno JS runtime
+/coverage
+
+# Node
+/node_modules
+
+# Composer (PHP), GitHub Pages / Jekyll (Ruby)
+/vendor
+
+# macOS
+.DS_Store
+
+# GitHub Pages / Jekyll
+.jekyll-metadata
+
+# Deno JS runtime
+*.lcov
+
+# Composer (PHP)
+composer.phar
+
+# GitHub Pages / Jekyll (Ruby)
+Gemfile.lock
+
+# Windows
+Thumbs.db

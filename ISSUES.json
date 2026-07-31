@@ -1,0 +1,50 @@
+{
+  "i": "ISSUES",
+  "o": "commits-to-changelog",
+  "#fork": { "0": "@:RUNS Fork from https://github.com/grafluxe/git-to-changelog",
+    ".gitignore": { "0": "@:DONE .gitignore from #template-gh" },
+    "delete": { "0": "@:DONE Delete unused files" },
+    "add": { "0": "@:DONE Add files from #template-gh" },
+    "license": { "0": "@:DONE Adjust LICENSE + as .txt" },
+    "cli.js": { "0": "@:DONE Rename 'main.js' to 'cli.js'" },
+    "package.json": { "0": "@:DONE Adjust package.json" },
+    "readme": { "0": "@:DONE Adjust / new README.md" }
+  },
+  "#fix-path": { "0": "@:DONE Fix: Replace hardwired path '../../package.json' with `process.cwd()+'/package.json'`",
+    "reason": { "0": "Mimics npm's way of storing 'node_modules' and so restricts to npm" }
+  },
+  "#change-commitURI-source": { "0": "@:TODO Get commitURI from 'git remote' instead of package.json",
+    "reason": { "0": "Make more Git oriented" },
+    "how-to": { "0": "@:TODO Sequence of steps",
+      "branch name": { "0": "@:TODO 'git branch --show-current'" },
+      "branch remote": { "0": "@:TODO 'git config branch.<branch-name>.remote'" },
+      "remote url": { "0": "@:TODO 'git remote get-url <branch-remote>'" }
+    }
+  },
+  "#fix-commitURI-pkg": { "0": "@:TODO Fix: commitURI from package.json",
+    "reason": { "0": "In git-to-changelog via 'pkg.homepage'" },
+    "superfluous": { "0": "May be superfluous depending on #change-commitURI-source" },
+    "via repo": { "0": "@:TODO Change to 'pkg.repository'",
+      "subkey": { "0": "@:TODO 'pkg.repository' vs. 'pkg.repository.url'" },
+      "resolve": { "0": "@:TODO Resolve variatons according to https://docs.npmjs.com/cli/v11/configuring-npm/package-json#repository" }
+    }
+  },
+  "#revert-version-required": { "0": "@:TODO Get rid of package version",
+    "independence": { "0": "Make more Git and less Node oriented" },
+    "no dependency": { "0": "Makes dependency compare-versions" }
+  },
+  "#fix-no-version": { "0": "@:TODO Fix: Crash comparePkgVersion if no pkgVers available",
+    "clear error": { "0": "@:TODO Throw clear error" },
+    "superfluous": { "0": "May be superfluous depending on #revert-version-required" }
+  },
+  "#require-tag": { "0": "@:TODO Require Git tag (instead of being optional)",
+    "reason": { "0": "Make more Git oriented" }
+  },
+  "#revert-stage": { "0": "@:TODO Revert: '--staged' option",
+    "reason": { "0": "Rather confusing than helpful" },
+    "readme": { "0": "@:TODO Reflect in README" }
+  },
+  "#feat-lib": { "0": "@:TODO Feature: Add library version",
+    "reason": { "0": "Original git-to-changelog is CLI-only" }
+  }
+}
