@@ -14,22 +14,49 @@ const _getRemoteRepoUrl=function(){
   const myBranch=spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
   if(!myBranch) throw Error(progName+': Could not get name of current branch');
   const myRemote=spawnSync('git',['config','branch.'+myBranch+'.remote'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
-  if(!myRemote) throw Error(progName+': Could not get remote name for current branch');
-  const myUrl=spawnSync('git',['remote','get-url',myRemote],{encoding:'utf8'}).stdout.replace(/\s/g,'');
-  if(!myUrl) throw Error(progName+': Could not get remote URL for current branch');
-  return myUrl;
+  if(!myRemote) return undefined;
+  let myUrl=spawnSync('git',['remote','get-url',myRemote],{encoding:'utf8'}).stdout.replace(/\s/g,'')
+  if(!myUrl) throw Error(progName+': Could not get URL for defined remote');
+  try{
+    myUrl=new URL(myUrl);
+  }
+  catch(err){
+    let errCode=Object.hasOwn(err,'code')?` (code: ${err.code})`:'';
+    throw Error(progName+': Invalid remote URL'+errCode);
+  }
+  if(myUrl.pathname.slice(-4)==='.git') myUrl.pathname=myUrl.pathname.slice(0,myUrl.pathname.length-4);
+  return myUrl.origin+myUrl.pathname;
 }
 
 const progName='commits-to-changelog';
-const remoteRepoUrl=_getRemoteRepoUrl();
 
+const _checkIfGitRepo=function(){
+  return new Promise((res, rej) => {
+    if(spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stderr.includes('not a git repository')) rej(Error('Not a Git repository'));
+    res();
+  });
+}
 
-if (remoteRepoUrl) {
-  let dir = (remoteRepoUrl.includes("bitbucket") ? "/commits/" : "/commit/");
-  commitURI = remoteRepoUrl + dir;
+const _getCommitURI=function(){
+  return new Promise((res, rej) => {
+    let remoteRepoUrl='';
+    try{
+      remoteRepoUrl=_getRemoteRepoUrl();
+    }
+    catch(err){
+      rej(err);
+    }
+    if (remoteRepoUrl) {
+      let dir = (remoteRepoUrl.includes("bitbucket") ? "/commits/" : "/commit/");
+      commitURI = remoteRepoUrl + dir;
+    }
+    res();
+  });
 }
 
 checkArgs()
+  .then(_checkIfGitRepo)
+  .then(_getCommitURI)
   .then(getCommits)
   .then(splitCommits)
   .then(formatCommits)

@@ -2,9 +2,10 @@
 
 # commits-to-changelog
 
-Create an unopionated CHANGELOG.md from the Git commit history of Node packages
+Create an unopionated CHANGELOG.md from Git commit history
 
-* If the project's package.json has a `repository` defined this will be used for commit links.
+* Requires a package.json file in the repo for which a CHANGELOG.md should be created to retrieve version information, but the repo need not be really a Node package, see [Details](#details)
+* If a [Git remote](#git-working-with-remotes-showing-your-remotes) is defined with an HTTPS URL this will be used (with some cleanup) for commit links (the remote is usually a GitHub repo from which the project is cloned from / pushes to, also GitLab / Bitbucket are possible)
 * If Git tags exist these will be used for structuring the changes.
 * Commits of merged branches are summarized with a title line "Implemented" (see [Examples](#examples))
 * Does explicitly not do any magic based on things [Conventional Commits](#conventional-commits) to keep it compatible with less organized repos, but of course you should use commit conventions.
@@ -108,7 +109,15 @@ Pick for your preferred package manager:
 
 ## Details
 
-With [git-to-changelog](#git-to-changelog) there already was a very good solution, but due to a hardwired search path '../../package.json' - mimicking npm's way of structuring a `node_modules` folder - one that does not work with pnpm, and in that turn some other little things were fixed (see [CHANGELOG](https://github.com/hh-lohmann/commits-to-changelog/blob/release/CHANGELOG.md)).
+* Node's package.json file concept is used to retrieve / store a version information for the repo for which a CHANGELOG.md should be created, but this boils down to just requiring a valid version string, e.g.
+  ```json
+  {
+    "version": "1.2.3"
+  }
+  ```
+
+
+* The (initial) code here is forked from [git-to-changelog](#git-to-changelog) that is already a very good solution, but due to a hardwired search path '../../package.json' - mimicking npm's way of structuring a `node_modules` folder - does not work with pnpm, and while fixing this some other little things were changed / improved (see [CHANGELOG](https://github.com/hh-lohmann/commits-to-changelog/blob/release/CHANGELOG.md)) and made the initial little fix grow into an own project
 
 
 ## Source Code
@@ -135,6 +144,9 @@ With [git-to-changelog](#git-to-changelog) there already was a very good solutio
   * npm registry: <https://www.npmjs.com/package/git-to-changelog>
   * npmx: <https://npmx.dev/package/git-to-changelog>
   * repo: <https://github.com/Grafluxe/git-to-changelog>
+
+### Git: Working with Remotes: Showing Your Remotes
+  * <https://git-scm.com/book/ms/v2/Git-Basics-Working-with-Remotes#_showing_your_remotes>
 
 ### Semantic Versioning: Pre-release versions
   * <https://semver.org/#spec-item-9>
