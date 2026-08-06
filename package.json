@@ -1,11 +1,11 @@
 {
   "name": "commits-to-changelog",
-  "description": "Create an unopionated CHANGELOG.md from the Git commit history of Node packages",
+  "description": "Create an unopionated CHANGELOG.md from Git commit history",
   "author": {
     "name": "hh lohmann",
     "email": "hh.lohmann@gmail.com"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "keywords": [
     "changelog",
     "log",
@@ -31,7 +31,13 @@
   "bin": {
     "commits-to-changelog": "cli.js"
   },
+  "scripts": {
+    "test": "node --test ./tests/**/*.test.*"
+  },
   "dependencies": {
     "compare-versions": "^3.6.0"
+  },
+  "devDependencies": {
+    "node-test-bootstrap": "^1.2.1"
   }
 }
