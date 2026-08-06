@@ -50,30 +50,38 @@ See the [CHANGELOG](https://github.com/Grafluxe/git-to-changelog/blob/master/CHA
 
 ### Merged Branches
 
-Merged commits with Git's default subject naming convention are summarized under a title line `Implement '<branch-name>'`, e.g.
+Branches that were merged as an explicit commit (i.e. no fast-forward) are listed as indented blocks with the message of the merge commit as a title line, e.g.
 
 ```sh
-git log --graph --oneline
-*   dddb03a (HEAD -> master, origin/master)  Merge branch 'feat/additional-validation' into master
+* dddb03a (HEAD -> master, origin/master) fix/unclear-error
 |\
-| * 1027df0 Update inline docs
-| * f6f8cd1 Update error e041 message
-| * 67e294b Add error e040
+| * f6f8cd1 Update error message
 |/
-* 8c6a1cc Add support for admin-only routes
 * 4bd8518 Update token hash to include encoded user name
 ```
 
-will be
+as
 
 ```markdown
-- Implement 'feat/additional-validation'
-  - Update inline docs
-  - Update error e041 message
-  - Add error e040
-- Add support for admin-only routes
+- fix/unclear-error
+  - Update error message
 - Update token hash to include encoded user name
 ```
+
+If the merge's commit message has the form `Merge branch '<branch name>'` it will be replaced by `Implement '<branch-name>'`, e.g.
+
+```sh
+* dddb03a (HEAD -> master, origin/master) Merge branch 'fix/unclear-error'
+...
+```
+
+as
+
+```markdown
+- Implement 'fix/unclear-error'
+...
+```
+
 
 
 ## Dependencies
