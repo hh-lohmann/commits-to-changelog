@@ -4,6 +4,7 @@
 
 Create an unopionated CHANGELOG.md from Git commit history
 
+* Creates CHANGELOG.md on each run from scratch, i.e. an existing on will be overwritten
 * Requires a package.json file in the repo for which a CHANGELOG.md should be created to retrieve version information, but the repo need not be really a Node package, see [Details](#details)
 * If a [Git remote](#git-working-with-remotes-showing-your-remotes) is defined with an HTTPS URL this will be used (with some cleanup) for commit links (the remote is usually a GitHub repo from which the project is cloned from / pushes to, also GitLab / Bitbucket are possible)
 * If Git tags exist these will be used for structuring the changes.
