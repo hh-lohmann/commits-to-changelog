@@ -7,8 +7,8 @@
 export {existsSync} from 'node:fs';
 export {chdir as cd} from 'node:process';
 import {spawnSync} from 'node:child_process';
-import {existsSync,mkdirSync,rmSync,statSync,writeFileSync} from 'node:fs';
-import {tmpdir} from 'node:os';
+import {existsSync,mkdirSync,readFileSync,rmSync,statSync,writeFileSync} from 'node:fs';
+import {EOL,tmpdir} from 'node:os';
 import {dirname,sep as pathSep} from 'node:path';
 import {cwd,execPath as runtimeExec} from 'node:process';
 
@@ -65,12 +65,12 @@ export const commonSpawn=function(commandline){
   });
   const myResult=spawnSync(exec,argsChecked,{encoding:'utf8'});
   if(myResult.error) {
-    //@ts-ignore - TS may not have correct Node error signature 
+    //@ts-ignore - TS may not have correct Node error signature
     let errCause=myResult.error.code;
     if(errCause==='ENOENT') errCause=`"${exec}" not found`;
     throw Error(_brandMsg(`commonSpawn: commandline not executable: "${commandline}": ${errCause}`));
   }
-  return {status:myResult.status,stderr:myResult.stderr.split('\n'),stdout:myResult.stdout.split('\n')}
+  return {status:myResult.status,stderr:myResult.stderr.split(EOL),stdout:myResult.stdout.split(EOL)}
 }
 
 /** Check if stderr in the return of a commonSpawn() contains a given string
@@ -121,7 +121,7 @@ export const commonSpawnOutContains=function(search,commonSpawnReturn){
  * @param commonSpawnReturn - The return of a commonSpawn() run
  * @param stream - Stream to search: 'stderr' / 'stderr' / 'all' [default]
  * @returns - true or false
- * @type {(search:string|RegExp,commonSpawnReturn:{[key: string]:any},stream?:string)=>boolean}
+ * @type {(search:string|RegExp,commonSpawnReturn:{[key:string]:any},stream?:string)=>boolean}
 */
 export const commonSpawnReturnContains=function(search,commonSpawnReturn,stream='all'){
   const streamTypes=['stderr','stdout','all'];
@@ -146,42 +146,116 @@ export const commonSpawnReturnContains=function(search,commonSpawnReturn,stream=
   return false;
 }
 
-/** Init Git with branch "mock" in current directory to use with mocks
- *  - Does nothing if Git with branch "mock" already exists 
- *  - Exits with error if Git is already inited without checked out branch
- *    being = "mock" => working in wrong directory? 
- * @type {()=>void}
+/** Read utf8 text file into an array with lines as entries
+ * @example fileToArr('CHANGELOG.md')
+ * @example fileToArr('CHANGELOG.md','last')
+ * @param file - name / path of file to read
+ * @param removeEmptyLines - Optional: Remove empty lines: 'all' / 'last' /
+ *    'none' (default)
+ * @returns array with file lines as entries
+ * @type {(file:string,removeEmptyLines?:'all'|'last'|'none')=>string[]}
  */
- export const gitInitMock=function(){
-  if(existsSync('.git')&&statSync('.git').isFile()) throw Error(_brandMsg('gitInitMock: File ".git" detected - erroneously processing in a Git worktree?'));
-  if(commonSpawn('git rev-parse --show-toplevel').stdout[0]===cwd()&&commonSpawn('git branch --show-current').stdout[0]!=='mock') throw Error(_brandMsg('gitInitMock: Git repo detected that does not seem to be a mock repo - erroneously processing in a real Git repo?'));
-  commonSpawn('git init -b mock');
+export const fileToArr=function(file,removeEmptyLines){
+  if(typeof file==='undefined') throw Error(_brandMsg(`fileToArr: Parameter "file" must not be undefined`));
+  if(typeof file!=='string') throw Error(_brandMsg(`fileToArr: Parameter "file" must be a string`));
+  if(file==='') throw Error(_brandMsg(`fileToArr: Parameter "file" must not be empty`));
+  if(!existsSync(file)) throw Error(_brandMsg(`fileToArr: Passed file not retrievable: "${file}"`));
+  const removeEmptyLinesVals=['all','last','none'];
+  if(!removeEmptyLines) removeEmptyLines='none';
+  if(!removeEmptyLinesVals.includes(removeEmptyLines)) throw Error(_brandMsg(`fileToArr: Parameter "removeEmptyLines" must be one of "${removeEmptyLinesVals.join('" / "')}"`));
+  const fileLines=
+    readFileSync(file,{encoding:'utf8'})
+    .split(EOL)
+  ;
+  if(removeEmptyLines==='all') return fileLines.filter(value=>value!=='');
+  if(removeEmptyLines==='last') return fileLines.slice(0,-1);
+  return fileLines;
 }
 
-/** Create Git mock commit
- *  - FS safe ISO datetime with ms of creation as file name, content and
- *    commit message
- *    * "FS safe" = 
- * @example gitMockCommit()
+/** Init Git with branch "mock" in current directory to use with mocks
+ *  - Does nothing if Git with branch "mock" already exists
+ *  - Exits with error if Git is already inited without checked out branch
+ *    being = "mock" => working in wrong directory?
+ * @param branch - Name of branch to use for new repo / accept in existing
+ *    repo (repo itself may have random name), default: mock
  * @returns -
- * @type {()=>void}
+ * @type {(branch?:string)=>void}
  */
-export const gitMockCommit=function(){
-  gitInitMock();
-  const fsDatetime=
+export const gitInitMock=function(branch='mock'){
+  if(typeof branch!=='string') throw Error(_brandMsg(`gitInitMock: Parameter "branch" must be a string`));
+  if(existsSync('.git')&&statSync('.git').isFile()) throw Error(_brandMsg('gitInitMock: File ".git" detected - erroneously processing in a Git worktree?'));
+  if(commonSpawn('git rev-parse --show-toplevel').stdout[0]===cwd()&&commonSpawn('git branch --show-current').stdout[0]!==branch) throw Error(_brandMsg('gitInitMock: Git repo detected that does not seem to be a mock repo - erroneously processing in a real Git repo?'));
+  commonSpawn('git init -b '+branch);
+}
+
+/** Return fs-safe zoneless variant of ISO datetime (with ms)
+ *  - fs-safe = File system invalid character ":" replaced by "-" and
+ *    possibly upper vs. lower case critical "T" by "--"
+ *  - zoneless: Not relative to UTC / GMT / Zulu time but absolute local
+ *    time and accordingly without timezone designator "Z" at the end
+ * @example _mkFsSafeZonelessIsoDatetime()
+ * @example _mkFsSafeZonelessIsoDatetime('1981-04-22T09:30')
+ * @example _mkFsSafeZonelessIsoDatetime(new Date(new Date().setMonth(10)))
+ * @param datetime - Optional: datetime to use, possible value types are
+ *    those of "new Date()"; default: '' = implicit "now"
+ * @returns string: fs-safe ISO datetime with ms
+ * @type {(date?:Date|string|number)=>string}
+ */
+const _mkFsSafeZonelessIsoDatetime=function(datetime){
+  if(typeof datetime==='undefined') datetime='';
+  if(new Date(datetime).toString()==='Invalid Date') throw Error(_brandMsg(`_mkFsSafeZonelessIsoDatetime: Passed "datetime" value is invalid`));
+  return(
     new Date(
-      new Date().valueOf()
-      -new Date().getTimezoneOffset()*60*1000
+      new Date(datetime).valueOf()
+      -new Date(datetime).getTimezoneOffset()*60*1000
     )
     .toISOString()
     .slice(0,-1)
     .replace('T','--')
     .replaceAll(':','-')
     .replace('.','-')
-  ;
-  writeFileSync(fsDatetime+'.txt',fsDatetime);
-  commonSpawn('git add '+fsDatetime+'.txt');
-  commonSpawn('git commit -m "'+fsDatetime+'"');
+  );
+}
+
+/** Fixed date in past to use for Git mocks: 500 days back
+ *  - ! Should be a constant, but does only work as function (maybe due
+ *    to timing with asyncish test runner?)
+*/
+const _dateInPast=function(){return new Date().valueOf()-1000*60*60*24*500;}
+
+/** Create Git mock commit
+ *  - {@link _mkFsSafeZonelessIsoDatetime} with {@link _dateInPast} for
+ *    filename / content / default commit message to distinguish generalized
+ *    mock from details of concrete test runs
+ * @example gitMockCommit()
+ * @example gitMockCommit({branch:'myTestBranch'})
+ * @param settings - Optional: object: Settings, currently known:
+ *    - branch: Branch to accept to work in = avoid doing something in a wrong
+ *      repo (repo itself may have random name); default: undefined (= leave to
+ *      gitInitMock)
+ *    - msg: commit message, default: {@link _mkFsSafeZonelessIsoDatetime} with
+ *      {@link _dateInPast}
+ * @returns -
+ * @type {(settings?:{branch?:string|undefined,msg?:string})=>void}
+ */
+export const gitMockCommit=function(settings){
+  const mockContent=_mkFsSafeZonelessIsoDatetime(_dateInPast());
+  const mockFile=mockContent+'.txt';
+  const defaultSettings={branch:undefined,msg:mockContent};
+  if(typeof settings!=='undefined'&&settings.constructor.name!=='Object') throw Error(_brandMsg(`gitMockCommit: Parameter "settings" must be an object`));
+  if(typeof settings==='undefined') settings=defaultSettings;
+  else{
+    Object.keys(defaultSettings).forEach(value=>{
+      //@ts-ignore - no way to let TS respect the 'undefined' check above
+      if(!Object.hasOwn(settings,value)) settings[value]=defaultSettings[value];
+    })
+  }
+  if(typeof settings?.branch!=='undefined'&&typeof settings?.branch!=='string') throw Error(_brandMsg(`gitMockCommit: Option "branch" must be a string`));
+  if(typeof settings?.msg!=='string') throw Error(_brandMsg(`gitMockCommit: Option "msg" must be a string`));
+  gitInitMock(settings.branch);
+  writeFileSync(mockFile,mockContent);
+  commonSpawn('git add '+mockFile);
+  commonSpawn('git commit -m "'+settings.msg+'"');
 }
 
 /** Create Git mock remote
@@ -198,6 +272,36 @@ export const gitMockRemote=function(url){
   gitInitMock();
   if(url) commonSpawn('git config remote.mock.url '+url);
   commonSpawn('git config branch.mock.remote mock');
+}
+
+/** Create Git mock tag
+ *  - {@link _mkFsSafeZonelessIsoDatetime} with {@link _dateInPast} as date to
+ *    distinguish generalized mock from details of concrete test runs
+ * @example gitMockTag()
+ * @example gitMockTag({msg:'My funny release name'})
+ * @param settings - Optional: object: Settings, currently known:
+ *    - branch: Branch to accept to work in = avoid doing something in a wrong
+ *      repo (repo itself may have random name); default: undefined (= leave to
+ *      gitInitMock)
+ *    - tagname: tagname to set, default: {@link _mkFsSafeZonelessIsoDatetime}
+ *       with {@link _dateInPast}
+ * @returns -
+ * @type {(settings?:{branch?:string|undefined,tagname:string})=>void}
+ */
+export const gitMockTag=function(settings){
+  const defaultSettings={branch:undefined,tagname:_mkFsSafeZonelessIsoDatetime(_dateInPast())};
+  if(typeof settings!=='undefined'&&settings.constructor.name!=='Object') throw Error(_brandMsg(`gitMockTag: Parameter "settings" must be an object`));
+  if(typeof settings==='undefined') settings=defaultSettings;
+  else{
+    Object.keys(defaultSettings).forEach(value=>{
+      //@ts-ignore - no way to let TS respect the 'undefined' check above
+      if(!Object.hasOwn(settings,value)) settings[value]=defaultSettings[value];
+    })
+  }
+  if(typeof settings?.branch!=='undefined'&&typeof settings?.branch!=='string') throw Error(_brandMsg(`gitMockTag: Option "branch" must be a string`));
+  if(typeof settings?.tagname!=='string') throw Error(_brandMsg(`gitMockTag: Option "tagname" must be a string`));
+  gitInitMock(settings.branch);
+  commonSpawn('git tag '+settings.tagname);
 }
 
 /** Create new / modifiy existing package.json with given key value pairs
