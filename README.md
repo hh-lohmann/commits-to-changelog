@@ -37,6 +37,25 @@ commits-to-changelog
 no parameters
 
 
+## Settings
+
+Default settings can be overwritten by key-value pairs in an object as value for a key "commits-to-changes" in a package.json belonging to the repo for which a CHANGELOG.md should be created, e.g.
+
+```json
+{
+  "headerDefault": "Latest"
+}
+```
+
+### headerDefault
+Header for listing commits that do not belong to a defined Git tag
+  * Default: "Current"
+
+### headerMerged
+Header for listing [Merged Branches](#merged-branches) with a commit message of the form `Merge branch '<branch name>'`
+  * Default: "Include (results of) separate branch"
+
+
 ## Returns
 
 no return
@@ -118,7 +137,7 @@ Pick for your preferred package manager:
 
 ## Details
 
-* Node's package.json file concept is used to retrieve / store a version information for the repo for which a CHANGELOG.md should be created, but this boils down to just requiring a valid version string, e.g.
+* Node's package.json file concept is used to retrieve / store a version information for the repo for which a CHANGELOG.md should be created and optional [Settings](#settings) for creation. Minimal requirement is a valid version string like e.g.
   ```json
   {
     "version": "1.2.3"

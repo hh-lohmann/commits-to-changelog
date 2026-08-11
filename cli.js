@@ -12,6 +12,16 @@ let fs = require("fs"),
     commitURI,
     out;
 
+/** Settings
+ *  - Predefined values that may be overwritten via "commits-to-changelog" in
+ *    a package.json belonging to the repo to make a changelog for
+ * @param ~~name~~ - ~~short descripion~~
+ */
+const _settings={
+  headerDefault: 'Current',
+  headerMerged: 'Include (results of) separate branch'
+}
+
 const _getRemoteRepoUrl=function(){
   const myBranch=spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
   if(!myBranch) throw Error(progName+': Could not get name of current branch');
@@ -147,7 +157,7 @@ function formatCommits(commits) {
     if (parents && parents.includes(" ")) {
       mergeCommitStart = true;
       prevParent = parents.slice(0, parents.indexOf(" "));
-      subject = subject.replace(/^Merge branch ('.+?').*/, "Include (results of) separate branch $1");
+      subject = subject.replace(/^Merge branch ('.+?').*/, _settings.headerMerged+'$1');
     } else if (hash == prevParent) {
       mergeCommitEnd = true;
     }
@@ -225,7 +235,7 @@ function evalNewestCommits(formattedCommits) {
       }
 
       if (!formattedCommits[0].tag) {
-        out += EOL+`## ${pkgVers === latestTag ? "Current" : pkgVers} (${getToday()})`+EOL+EOL;
+        out += EOL+`## ${pkgVers === latestTag ? _settings.headerDefault : pkgVers} (${getToday()})`+EOL+EOL;
       }
 
       res(formattedCommits);
