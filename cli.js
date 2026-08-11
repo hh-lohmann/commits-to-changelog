@@ -8,7 +8,6 @@ let fs = require("fs"),
     exec = require("child_process").exec,
     comparePkgVersion = require("compare-versions"),
     pkg,
-    hasStageFlag = false,
     commitURI,
     out;
 
@@ -74,6 +73,17 @@ const _getPackageJson=function(){
   });
 }
 
+const _getCommitSettings=function(){
+  return new Promise((res, rej) => {
+    if(Object.hasOwn(pkg,'commits-to-changelog')){
+      Object.keys(pkg['commits-to-changelog']).forEach(value=>{
+        _settings[value]=pkg['commits-to-changelog'][value];
+      })
+    }
+    res();
+  });
+}
+
 const _getCommitURI=function(){
   return new Promise((res, rej) => {
     let remoteRepoUrl='';
@@ -94,6 +104,7 @@ const _getCommitURI=function(){
 checkArgs()
   .then(_checkIfGitRepo)
   .then(_getPackageJson)
+  .then(_getCommitSettings)
   .then(_getCommitURI)
   .then(getCommits)
   .then(splitCommits)
@@ -103,7 +114,6 @@ checkArgs()
   .then(evalNewestCommits)
   .then(prepareOutput)
   .then(save)
-  .then(addToGitStage)
   .catch(err => {
     let errMsg = "";
 
@@ -119,13 +129,9 @@ checkArgs()
 
 function checkArgs() {
   const args = process.argv.slice(2);
-
-  hasStageFlag = args[0] === "--stage";
-
-  if (args.length > 1 || (args.length === 1 && !hasStageFlag)) {
-    return Promise.reject("You're using an unsupported argument.");
+  if (args.length > 0) {
+    return Promise.reject("Currently no command line arguments are supported");
   }
-
   return Promise.resolve();
 }
 
@@ -287,22 +293,6 @@ function prepareOutput(formattedCommits) {
 function save() {
   return new Promise((res, rej) => {
     fs.writeFile("./CHANGELOG.md", out, err => {
-      if (err) {
-        return rej(err);
-      }
-
-      res();
-    });
-  });
-}
-
-function addToGitStage() {
-  if (!hasStageFlag) {
-    return Promise.resolve();
-  }
-
-  return new Promise((res, rej) => {
-    exec("git add CHANGELOG.md", (err) => {
       if (err) {
         return rej(err);
       }

@@ -144,7 +144,6 @@ Pick for your preferred package manager:
   }
   ```
 
-
 * The (initial) code here is forked from [git-to-changelog](#git-to-changelog) that is already a very good solution, but due to a hardwired search path '../../package.json' - mimicking npm's way of structuring a `node_modules` folder - does not work with pnpm, and while fixing this some other little things were changed / improved (see [CHANGELOG](https://github.com/hh-lohmann/commits-to-changelog/blob/release/CHANGELOG.md)) and made the initial little fix grow into an own project
 
 

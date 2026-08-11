@@ -4,6 +4,7 @@ import { assert,suite,test } from 'node-test-bootstrap';
 import {after,before} from 'node:test';
 import {rmSync} from 'node:fs';
 import * as _lib from './_lib.js';
+import {testOnlyExports} from '../cli.js';
 
 /** @type{string[]} */
 let changelogLines;
@@ -91,14 +92,12 @@ suite('Do: Changelog file layout',()=>{
     );
   });
 
-  test( 'Title of group for commits after last tag starts with _settings.defaultHeader + " "" if pkgVers matches last tag',()=> {
+  test(`Title of group for commits after last tag starts with _settings.headerDefault (current: "${testOnlyExports()?._settings.headerDefault}") + " " if pkgVers matches last tag`,()=> {
     assert(
       (()=>{
-        // const searchString=_settings.defaultHeader+ ' ';
-        const defaultTitle="## Current";
+        const searchString='## '+testOnlyExports()?._settings.headerDefault+ ' ';
         let i=headerLines.length+1;
-        console.log('TUGGA',changelogLines[i]);
-        if(changelogLines[i].slice(0,defaultTitle.length)!==defaultTitle) return false;
+        if(changelogLines[i].slice(0,searchString.length)!==searchString) return false;
         return true;
       })(),
       'unexpected header in CHANGELOG.md, see '+tstdir
