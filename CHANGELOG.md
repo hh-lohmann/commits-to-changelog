@@ -1,7 +1,16 @@
 # Changelog
 
+## 1.3.0 (2026-08-11)
+
+- [Revert undocumented optional argument --stage (was just formally inherited from git-to-changelog)](https://github.com/hh-lohmann/commits-to-changelog/commit/d47f424)
+- [tests](https://github.com/hh-lohmann/commits-to-changelog/commit/65c8fc9)
+- [Feature: Read settings from package.json](https://github.com/hh-lohmann/commits-to-changelog/commit/f835279)
+- [Refactoring](https://github.com/hh-lohmann/commits-to-changelog/commit/b7272a3)
+- [tests](https://github.com/hh-lohmann/commits-to-changelog/commit/30ed6f8)
+
 ## 1.2.0 (2026-08-11)
 
+- [changelog](https://github.com/hh-lohmann/commits-to-changelog/commit/43445d1)
 - [Change title for merged branches from opionated "Implement" to more neutral "Include (results of) separate branch"](https://github.com/hh-lohmann/commits-to-changelog/commit/905ee21)
 - [Improve error handling](https://github.com/hh-lohmann/commits-to-changelog/commit/b80d4aa)
 
