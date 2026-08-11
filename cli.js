@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 const { spawnSync } = require('node:child_process');
+const {existsSync}=require('node:fs');
 
 let fs = require("fs"),
     exec = require("child_process").exec,
     comparePkgVersion = require("compare-versions"),
-    pkg = require(process.cwd()+'/package.json'),
+    pkg,
     hasStageFlag = false,
     commitURI,
     out;
@@ -38,6 +39,19 @@ const _checkIfGitRepo=function(){
   });
 }
 
+const _getPackageJson=function(){
+  return new Promise((res, rej) => {
+    if(!existsSync('package.json')) throw Error('No package.json found');
+    try{
+      pkg=require(process.cwd()+'/package.json');
+    }
+    catch(err) {
+      return rej(Error('package.json could not be loaded'));
+    }
+    res();
+  });
+}
+
 const _getCommitURI=function(){
   return new Promise((res, rej) => {
     let remoteRepoUrl='';
@@ -57,6 +71,7 @@ const _getCommitURI=function(){
 
 checkArgs()
   .then(_checkIfGitRepo)
+  .then(_getPackageJson)
   .then(_getCommitURI)
   .then(getCommits)
   .then(splitCommits)
