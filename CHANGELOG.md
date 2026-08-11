@@ -1,8 +1,13 @@
 # Changelog
 
+## 1.2.0 (2026-08-11)
+
+- [Change title for merged branches from opionated "Implement" to more neutral "Include (results of) separate branch"](https://github.com/hh-lohmann/commits-to-changelog/commit/905ee21)
+- [Improve error handling](https://github.com/hh-lohmann/commits-to-changelog/commit/b80d4aa)
+
 ## 1.1.0 (2026-08-11)
 
-- [Change default title for group of commits from "Latest" to more neutral "Current"](https://github.com/hh-lohmann/commits-to-changelog/commit/a576d81)
+- [Change default title for group of commits from "Latest" to more neutral "Current"](https://github.com/hh-lohmann/commits-to-changelog/commit/e2e12a0)
 - [README: Clarify: Existing CHANGELOG.md will be overwritten](https://github.com/hh-lohmann/commits-to-changelog/commit/47ddd8f)
 - [README: Clarify handling of merged branches](https://github.com/hh-lohmann/commits-to-changelog/commit/c235acd)
 
