@@ -1,7 +1,7 @@
 // @ts-check
 
-const { assert, test } = require('node-test-bootstrap');
-const _lib = require('./_lib.js');
+import { assert,test } from 'node-test-bootstrap';
+import * as _lib from './_lib.js';
 
 test( 'Exit: No package.json found',()=> {
   const tstdir=_lib.randomTmpDir();

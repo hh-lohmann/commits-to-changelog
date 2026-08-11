@@ -1,8 +1,8 @@
 // @ts-check
 
-const { assert,test } = require('node-test-bootstrap');
-const _lib = require('./_lib.js');
-const {writeFileSync} = require('node:fs');
+import { assert,test } from 'node-test-bootstrap';
+import * as _lib from './_lib.js';
+import {writeFileSync} from 'node:fs';
 
 
 test( 'Exit: Error writing CHANGELOG.md file',()=> {

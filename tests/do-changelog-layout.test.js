@@ -1,9 +1,9 @@
 // @ts-check
 
-const { assert,suite,test } = require('node-test-bootstrap');
-const {after,before} = require('node:test');
-const {rmSync} = require('node:fs');
-const _lib = require('./_lib.js');
+import { assert,suite,test } from 'node-test-bootstrap';
+import {after,before} from 'node:test';
+import {rmSync} from 'node:fs';
+import * as _lib from './_lib.js';
 
 /** @type{string[]} */
 let changelogLines;
@@ -91,11 +91,13 @@ suite('Do: Changelog file layout',()=>{
     );
   });
 
-  test( 'Title of group for commits after last tag is "Current" if pkgVers matches last tag',()=> {
+  test( 'Title of group for commits after last tag starts with _settings.defaultHeader + " "" if pkgVers matches last tag',()=> {
     assert(
       (()=>{
+        // const searchString=_settings.defaultHeader+ ' ';
         const defaultTitle="## Current";
         let i=headerLines.length+1;
+        console.log('TUGGA',changelogLines[i]);
         if(changelogLines[i].slice(0,defaultTitle.length)!==defaultTitle) return false;
         return true;
       })(),
@@ -167,7 +169,7 @@ suite('Do: Changelog file layout',()=>{
   });
 
   after(()=> {
-    _lib.rmDir(tstdir);
+    // _lib.rmDir(tstdir);
   });
 
 })

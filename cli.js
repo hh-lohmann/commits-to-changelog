@@ -22,6 +22,17 @@ const _settings={
   headerMerged: 'Include (results of) separate branch'
 }
 
+exports.testOnlyExports=function(){
+  const localTestsFolder=module.path+'/tests/';
+  if(process.argv[1].slice(0,localTestsFolder.length)===localTestsFolder){
+    return (
+      {
+      _settings:_settings
+      }
+    )
+  }
+}
+
 const _getRemoteRepoUrl=function(){
   const myBranch=spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
   if(!myBranch) throw Error(progName+': Could not get name of current branch');
