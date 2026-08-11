@@ -46,7 +46,7 @@ no return
 
 ## Sample Output
 
-See the [CHANGELOG](https://github.com/Grafluxe/git-to-changelog/blob/master/CHANGELOG.md) of [git-to-changelog](#git-to-changelog), the project from which the code here was forked.
+See the [CHANGELOG.md](https://github.com/hh-lohmann/commits-to-changelog/blob/release/CHANGELOG.md) of this project
 
 
 ### Merged Branches
@@ -69,7 +69,7 @@ as
 - Update token hash to include encoded user name
 ```
 
-If the merge's commit message has the form `Merge branch '<branch name>'` it will be replaced by `Implement '<branch-name>'`, e.g.
+If the merge's commit message has the form `Merge branch '<branch name>'` it will be replaced by `Include (results of) separate branch '<branch-name>'`, e.g.
 
 ```sh
 * dddb03a (HEAD -> master, origin/master) Merge branch 'fix/unclear-error'
@@ -79,7 +79,7 @@ If the merge's commit message has the form `Merge branch '<branch name>'` it wil
 as
 
 ```markdown
-- Implement 'fix/unclear-error'
+- Include (results of) separate branch 'fix/unclear-error'
 ...
 ```
 

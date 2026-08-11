@@ -146,7 +146,7 @@ function formatCommits(commits) {
     if (parents && parents.includes(" ")) {
       mergeCommitStart = true;
       prevParent = parents.slice(0, parents.indexOf(" "));
-      subject = subject.replace(/^Merge branch ('.+?').*/, "Implement $1");
+      subject = subject.replace(/^Merge branch ('.+?').*/, "Include (results of) separate branch $1");
     } else if (hash == prevParent) {
       mergeCommitEnd = true;
     }
