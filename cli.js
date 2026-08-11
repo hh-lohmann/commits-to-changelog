@@ -24,6 +24,7 @@ const _getRemoteRepoUrl=function(){
     let errCode=Object.hasOwn(err,'code')?` (code: ${err.code})`:'';
     throw Error(progName+': Invalid remote URL'+errCode);
   }
+  if(myUrl.pathname==='/') return myUrl.origin;
   if(myUrl.pathname.slice(-4)==='.git') myUrl.pathname=myUrl.pathname.slice(0,myUrl.pathname.length-4);
   return myUrl.origin+myUrl.pathname;
 }
@@ -62,7 +63,7 @@ checkArgs()
   .then(formatCommits)
   .then(flagIndention)
   .then(setHeader)
-  .then(handleFirstCommitVersion)
+  .then(evalNewestCommits)
   .then(prepareOutput)
   .then(save)
   .then(addToGitStage)
@@ -177,7 +178,7 @@ function setHeader(formattedCommits) {
   return Promise.resolve(formattedCommits);
 }
 
-function handleFirstCommitVersion(formattedCommits) {
+function evalNewestCommits(formattedCommits) {
   return new Promise((res, rej) => {
     exec("git log --tags -1 --format=\"%d\"", (err, commit) => {
       if (err) {
@@ -208,7 +209,7 @@ function handleFirstCommitVersion(formattedCommits) {
       }
 
       if (!formattedCommits[0].tag) {
-        out += `\n## ${pkgVers === latestTag ? "Latest" : pkgVers} (${getToday()})\n\n`;
+        out += `\n## ${pkgVers === latestTag ? "Current" : pkgVers} (${getToday()})\n\n`;
       }
 
       res(formattedCommits);

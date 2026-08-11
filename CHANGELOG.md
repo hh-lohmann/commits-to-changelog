@@ -1,7 +1,14 @@
 # Changelog
 
+## 1.1.0 (2026-08-11)
+
+- [Change default title for group of commits from "Latest" to more neutral "Current"](https://github.com/hh-lohmann/commits-to-changelog/commit/a576d81)
+- [README: Clarify: Existing CHANGELOG.md will be overwritten](https://github.com/hh-lohmann/commits-to-changelog/commit/47ddd8f)
+- [README: Clarify handling of merged branches](https://github.com/hh-lohmann/commits-to-changelog/commit/c235acd)
+
 ## 1.0.2 (2026-08-06)
 
+- [changelog](https://github.com/hh-lohmann/commits-to-changelog/commit/fd173e1)
 - [Add tests](https://github.com/hh-lohmann/commits-to-changelog/commit/9b2a457)
 - [Small fixes](https://github.com/hh-lohmann/commits-to-changelog/commit/4b661d6)
 
