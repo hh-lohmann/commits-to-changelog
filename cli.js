@@ -2,6 +2,7 @@
 
 const { spawnSync } = require('node:child_process');
 const {existsSync}=require('node:fs');
+const {EOL}=require('node:os');
 
 let fs = require("fs"),
     exec = require("child_process").exec,
@@ -85,12 +86,12 @@ checkArgs()
   .catch(err => {
     let errMsg = "";
 
-    errMsg += "+--------------------------------------------+\n";
-    errMsg += "| There was an error creating your changelog |\n";
-    errMsg += "+--------------------------------------------+\n";
+    errMsg += "+--------------------------------------------+"+EOL;
+    errMsg += "| There was an error creating your changelog |"+EOL;
+    errMsg += "+--------------------------------------------+"+EOL;
 
     console.error("\x1b[31m%s\x1b[0m", errMsg);
-    console.error(err + "\n");
+    console.error(err + EOL);
 
     process.exit(1);
   });
@@ -120,7 +121,7 @@ function getCommits() {
 }
 
 function splitCommits(commits) {
-  return Promise.resolve(commits.trim().split("\n"));
+  return Promise.resolve(commits.trim().split(EOL));
 }
 
 function formatCommits(commits) {
@@ -188,7 +189,7 @@ function flagIndention(formattedCommits) {
 }
 
 function setHeader(formattedCommits) {
-  out = "# Changelog\n";
+  out = "# Changelog"+EOL;
 
   return Promise.resolve(formattedCommits);
 }
@@ -224,7 +225,7 @@ function evalNewestCommits(formattedCommits) {
       }
 
       if (!formattedCommits[0].tag) {
-        out += `\n## ${pkgVers === latestTag ? "Current" : pkgVers} (${getToday()})\n\n`;
+        out += EOL+`## ${pkgVers === latestTag ? "Current" : pkgVers} (${getToday()})`+EOL+EOL;
       }
 
       res(formattedCommits);
@@ -245,7 +246,7 @@ function prepend0(val) {
 function prepareOutput(formattedCommits) {
   formattedCommits.forEach(commit => {
     if (commit.tag) {
-      out += `\n## ${commit.tag} (${commit.date})\n\n`;
+      out += EOL+`## ${commit.tag} (${commit.date})`+EOL+EOL;
     }
 
     if (commit.indent) {
@@ -253,9 +254,9 @@ function prepareOutput(formattedCommits) {
     }
 
     if (commitURI) {
-      out += `- [${commit.subject}](${commitURI + commit.hash})\n`;
+      out += `- [${commit.subject}](${commitURI + commit.hash})`+EOL;
     } else {
-      out += `- ${commit.subject}\n`;
+      out += `- ${commit.subject}`+EOL;
     }
   });
 
