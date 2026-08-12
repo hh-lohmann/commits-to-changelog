@@ -5,10 +5,12 @@
 Create an unopionated CHANGELOG.md from Git commit history
 
 * Creates CHANGELOG.md on each run from scratch, i.e. an existing on will be overwritten
+* Commits that are rather not relevant for users, e.g. "bump version" / changelog" / addressing "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be [defined](#filtercommits) as as [setting](#settings) 
+  * I.e. no pressure to spoof commits or history to get a nice CHANGELOG
 * Requires a package.json file in the repo for which a CHANGELOG.md should be created to retrieve version information, but the repo need not be really a Node package, see [Details](#details)
 * If a [Git remote](#git-working-with-remotes-showing-your-remotes) is defined with an HTTPS URL this will be used (with some cleanup) for commit links (the remote is usually a GitHub repo from which the project is cloned from / pushes to, also GitLab / Bitbucket are possible)
 * If Git tags exist these will be used for structuring the changes.
-* Commits of merged branches are summarized with a title line "Implemented" (see [Examples](#examples))
+* Special handling of [Merged Branches](#merged-branches)
 * Does explicitly not do any magic based on things [Conventional Commits](#conventional-commits) to keep it compatible with less organized repos, but of course you should use commit conventions.
 
 > Note that this is a fork of the ingenious [git-to-changelog](#git-to-changelog) with [some adjustments](#details).
@@ -39,20 +41,40 @@ no parameters
 
 ## Settings
 
-Default settings can be overwritten by key-value pairs in an object as value for a key "commits-to-changes" in a package.json belonging to the repo for which a CHANGELOG.md should be created, e.g.
+Default settings can be overwritten by key-value pairs in an object as value for a key "commits-to-changelog" in a package.json belonging to the repo for which a CHANGELOG.md should be created, e.g.
 
 ```json
+// package.json
 {
-  "headerDefault": "Latest"
+  "version": "...",
+  "commits-to-changelog": {
+    "headerDefault": "Latest",
+    "headerMerged": "Implement"
+  },
+  "dependencies": {
+    "...": "..."
+  }
 }
 ```
 
+### filterCommits
+Array of RegExp: Filter out commits / commit types identified by a message matching one of the RegExps in the array
+  * Default: undefined
+  * Cf. [filterDefaults](#filterdefaults)
+  * May be used for types of commits identified by message patterns or exact commits to exclude from a sensible CHANGELOG
+  * Since JSON has no own type for them, RegExps have to be defined as strings, unlike vanilla JavaScript filterCommits does handle e.g. `^exp$` exactly like `/^exp$/` (i,e. interprets unquoted `/` at start and end as RegExp delimiters, not as literal `/` part of the RegExp)
+
+### filterDefaults
+Boolean: Filter out commit types that are rather not relevant for users by matching commit messages against RegExps `/^bump version$/`, `/^changelog$/`, `/^dev:/`, `/^[Hh]ousekeeping/`, `/^planning/`, `/[Rr]efactoring/`, `/tests/`
+  * Default: true
+  * Own / additional RegExps via [filterCommits](#filtercommits)
+
 ### headerDefault
-Header for listing commits that do not belong to a defined Git tag
+String to use as header for listing commits that do not belong to a defined Git tag
   * Default: "Current"
 
 ### headerMerged
-Header for listing [Merged Branches](#merged-branches) with a commit message of the form `Merge branch '<branch name>'`
+String to use as header for listing [Merged Branches](#merged-branches) with a commit message of the form `Merge branch '<branch name>'`
   * Default: "Include (results of) separate branch"
 
 
@@ -63,7 +85,7 @@ no return
 
 ## Examples
 
-## Sample Output
+### Sample Output
 
 See the [CHANGELOG.md](https://github.com/hh-lohmann/commits-to-changelog/blob/release/CHANGELOG.md) of this project
 

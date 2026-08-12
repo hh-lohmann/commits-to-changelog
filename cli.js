@@ -17,6 +17,8 @@ let fs = require("fs"),
  * @param ~~name~~ - ~~short descripion~~
  */
 const _settings={
+  filterCommits:[],
+  filterDefaults: true,
   headerDefault: 'Current',
   headerMerged: 'Include (results of) separate branch'
 }
@@ -73,12 +75,29 @@ const _getPackageJson=function(){
   });
 }
 
-const _getCommitSettings=function(){
+/** Handle string containing RegExp
+ *  - Especially for JSON that has no type "RegExp"
+ *  - Makes both e.g. "/^exp$/" and "^exp$" to /^exp$/ (i.e. interprets
+ *    unquoted "/" at start and end as RegExp delimiters)
+ * @example _stringToRegExp("/^exp$/")
+ * @example _stringToRegExp("^exp$")
+ * @param string - The string to return as RegExp
+ * @returns Resulting RegExp
+ * @type {(string:string)=>RegExp}
+ */
+const _stringToRegExp=function(string){
+  if(/^\//.test(string)) string=string.slice(1);
+  if(/[^\\]\/$/.test(string)) string=string.slice(0,-1);
+  return new RegExp(string);
+}
+
+const _getSettings=function(){
   return new Promise((res, rej) => {
     if(Object.hasOwn(pkg,'commits-to-changelog')){
       Object.keys(pkg['commits-to-changelog']).forEach(value=>{
         _settings[value]=pkg['commits-to-changelog'][value];
       })
+      _settings.filterCommits=_settings.filterCommits.map(value=>_stringToRegExp(value));
     }
     res();
   });
@@ -104,7 +123,7 @@ const _getCommitURI=function(){
 checkArgs()
   .then(_checkIfGitRepo)
   .then(_getPackageJson)
-  .then(_getCommitSettings)
+  .then(_getSettings)
   .then(_getCommitURI)
   .then(getCommits)
   .then(splitCommits)
@@ -271,9 +290,14 @@ function prepend0(val) {
 }
 
 function prepareOutput(formattedCommits) {
+  if(_settings.filterDefaults) [ /^bump version$/, /^changelog$/, /^dev:/, /^[Hh]ousekeeping/, /^planning/, /[Rr]efactoring/, /tests/ ].forEach(value=>{_settings.filterCommits.push(value)});
   formattedCommits.forEach(commit => {
     if (commit.tag) {
       out += EOL+`## ${commit.tag} (${commit.date})`+EOL+EOL;
+    }
+
+    for(const filter of _settings.filterCommits){
+      if(new RegExp(filter).test(commit.subject)) return;
     }
 
     if (commit.indent) {
