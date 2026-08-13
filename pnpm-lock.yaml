@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      compare-versions:
-        specifier: ^3.6.0
-        version: 3.6.0
     devDependencies:
       node-test-bootstrap:
         specifier: ^1.2.1
@@ -18,15 +14,10 @@ importers:
 
 packages:
 
-  compare-versions@3.6.0:
-    resolution: {integrity: sha512-W6Af2Iw1z4CB7q4uU4hv646dW9GQuBM+YpC0UvUCWSD8w90SJjp+ujJuXaEMtAXBtSqGfMPuFOVn4/+FlaqfBA==}
-
   node-test-bootstrap@1.2.1:
     resolution: {integrity: sha512-kI/7CvrgzUqzE4K/ynzPm+pyZVlcowu0aGvDba+y2ngLXtb2wC0Vwkbb2xZ01hXUQfnfhjWkU86YrmHiArPvgg==}
     engines: {node: '>=22.20.0'}
 
 snapshots:
-
-  compare-versions@3.6.0: {}
 
   node-test-bootstrap@1.2.1: {}

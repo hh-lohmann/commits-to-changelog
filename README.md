@@ -128,7 +128,7 @@ as
 
 ## Dependencies
 
-* [compare-versions](#compare-versions) to resolve sometimes complex version numbers for being smaller or greater (e.g. [pre-release versions](#semantic-versioning-pre-release-versions))
+none
 
 
 ## Installation
@@ -180,11 +180,6 @@ Pick for your preferred package manager:
 
 
 ## References
-
-### compare-versions
-  * npm registry: <https://www.npmjs.com/package/compare-versions>
-  * npmx: <https://npmx.dev/package/compare-versions>
-  * repo: <https://github.com/omichelsen/compare-versions>
 
 ### Conventional Commits
   * <https://www.conventionalcommits.org>

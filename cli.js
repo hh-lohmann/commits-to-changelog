@@ -6,10 +6,11 @@ const {EOL}=require('node:os');
 
 let fs = require("fs"),
     exec = require("child_process").exec,
-    comparePkgVersion = require("compare-versions"),
     pkg,
     commitURI,
     out;
+
+const progName='commits-to-changelog';
 
 /** Settings
  *  - Predefined values that may be overwritten via "commits-to-changelog" in
@@ -34,6 +35,44 @@ exports.testOnlyExports=function(){
   }
 }
 
+/** Check if a string is a non-labeled SemVer
+ * - non-labeled = purely 'major.minor.patch'
+ * - NB: as function to give it a clear semantic
+ * @example _checkNonLabeledSemver('5.3.77')
+ * @param version - string: Version string to check
+ * @returns boolean
+ * @type {(version:string)=>boolean}
+ */
+const _checkNonLabeledSemver=function(version){
+  if(!version) throw Error(progName+': _checkNonLabeledSemver: No version passed');
+  if(typeof version!=='string') throw Error(progName+': _checkNonLabeledSemver: Parameter "version" must be a string');
+  if(new RegExp(/^[0-9]+\.+[0-9]+\.+[0-9]+$/).test(version)) return true;
+  return false;
+}
+
+/** Compare two non-labeled SemVer strings
+ *  - non-labeled => _checkNonLabeledSemver()
+ * @example _compareSemver('1.5.1','1.5.0')
+ * @param semver1 - string: First SemVer string for comparison
+ * @param semver2 - string: Second SemVer string for comparison
+ * @returns number: 0: equal, 1: semver1 newer, 2: semver2 newer
+ * @type {(semver1:string,semver2:string)=>0|1|2}
+ */
+const _compareSemver=function(semver1,semver2){
+  [semver1,semver2].forEach((value,index)=>{
+    if(!value) throw Error(progName+`: _compareSemver: Parameter "semver${index+1}" not set`);
+    if(typeof value!=='string') throw Error(progName+`: _compareSemver: Parameter "semver${index+1}" must be a string`);
+    if(!_checkNonLabeledSemver(value)) throw Error(progName+`: _compareSemver: Parameter "semver${index+1}" must be a non-labeled SemVer "major.minor.patch"`);
+  })
+  const segments_1=semver1.split('.');
+  const segments_2=semver2.split('.');
+  for(let i=0;i<3;i++){
+    if(segments_1[i]>segments_2[i]) return 1;
+    if(segments_1[i]<segments_2[i]) return 2;
+  }
+  return 0;
+}
+
 const _getRemoteRepoUrl=function(){
   const myBranch=spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
   if(!myBranch) throw Error(progName+': Could not get name of current branch');
@@ -52,8 +91,6 @@ const _getRemoteRepoUrl=function(){
   if(myUrl.pathname.slice(-4)==='.git') myUrl.pathname=myUrl.pathname.slice(0,myUrl.pathname.length-4);
   return myUrl.origin+myUrl.pathname;
 }
-
-const progName='commits-to-changelog';
 
 const _checkIfGitRepo=function(){
   return new Promise((res, rej) => {
@@ -259,14 +296,14 @@ function evalNewestCommits(formattedCommits) {
 
       if(!pkgVers) return rej('The package.json for the current project does not contain a version key');
 
+      let comparePkgVersLatestTag;
       try{
-        comparePkgVersion(pkgVers, latestTag)
+        comparePkgVersLatestTag=_compareSemver(pkgVers,latestTag);
       }
       catch(err){
         return rej(`Your package version (${pkgVers}) cannot be processed: ${err.message}`);
       }
-
-      if (comparePkgVersion(pkgVers, latestTag) === -1) {
+      if(comparePkgVersLatestTag===2){
         return rej(`Your package version (${pkgVers}) has a SemVer value that falls before your latest tag (${latestTag}).`);
       }
 
