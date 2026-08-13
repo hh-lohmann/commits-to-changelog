@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1 (2026-08-13)
+
+- [Feature: Replace dependency compare-versions by own function](https://github.com/hh-lohmann/commits-to-changelog/commit/ac95b03)
+
 ## 1.4.0 (2026-08-12)
 
 - [Filter commits: Exclude commits / commit types via RegExp against commit messages](https://github.com/hh-lohmann/commits-to-changelog/commit/e5fec88)
