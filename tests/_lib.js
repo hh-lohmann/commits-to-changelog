@@ -7,23 +7,14 @@
 export {existsSync} from 'node:fs';
 export {chdir as cd} from 'node:process';
 import {spawnSync} from 'node:child_process';
-import {existsSync,mkdirSync,readFileSync,rmSync,statSync,writeFileSync} from 'node:fs';
+import {existsSync,mkdirSync,rmSync,statSync,writeFileSync} from 'node:fs';
 import {EOL,tmpdir} from 'node:os';
 import {dirname,sep as pathSep} from 'node:path';
 import {cwd,execPath as runtimeExec} from 'node:process';
+import {testOnlyExports} from '../cli.js';
 
-/** Brand a message string by prefixing "<brand>: "
- *  - Mainly for branding with name of current script / module
- * @param msg: String: the message to brand
- * @param brand: Optional: string: brand to prefix, default: name of current
- *    script / module
- * @type {(msg:string,brand?:string)=>string}
-*/
-const _brandMsg=function(msg,brand){
-  if(!msg) msg='(no message)';
-  if(!brand) brand=import.meta.filename.split(pathSep).slice(-1)[0];
-  return brand+': '+msg;
-}
+// @ts-ignore
+const _brandMsg=testOnlyExports().brandMsg;
 
 /** Simplify Node's spawnSync call signature / return to its common usage
  *  - i.e. stdio encoding utf8 and passing a usual command line call divided by
@@ -146,31 +137,6 @@ export const commonSpawnReturnContains=function(search,commonSpawnReturn,stream=
   return false;
 }
 
-/** Read utf8 text file into an array with lines as entries
- * @example fileToArr('CHANGELOG.md')
- * @example fileToArr('CHANGELOG.md','last')
- * @param file - name / path of file to read
- * @param removeEmptyLines - Optional: Remove empty lines: 'all' / 'last' /
- *    'none' (default)
- * @returns array with file lines as entries
- * @type {(file:string,removeEmptyLines?:'all'|'last'|'none')=>string[]}
- */
-export const fileToArr=function(file,removeEmptyLines){
-  if(typeof file==='undefined') throw Error(_brandMsg(`fileToArr: Parameter "file" must not be undefined`));
-  if(typeof file!=='string') throw Error(_brandMsg(`fileToArr: Parameter "file" must be a string`));
-  if(file==='') throw Error(_brandMsg(`fileToArr: Parameter "file" must not be empty`));
-  if(!existsSync(file)) throw Error(_brandMsg(`fileToArr: Passed file not retrievable: "${file}"`));
-  const removeEmptyLinesVals=['all','last','none'];
-  if(!removeEmptyLines) removeEmptyLines='none';
-  if(!removeEmptyLinesVals.includes(removeEmptyLines)) throw Error(_brandMsg(`fileToArr: Parameter "removeEmptyLines" must be one of "${removeEmptyLinesVals.join('" / "')}"`));
-  const fileLines=
-    readFileSync(file,{encoding:'utf8'})
-    .split(EOL)
-  ;
-  if(removeEmptyLines==='all') return fileLines.filter(value=>value!=='');
-  if(removeEmptyLines==='last') return fileLines.slice(0,-1);
-  return fileLines;
-}
 
 /** Init Git with branch "mock" in current directory to use with mocks
  *  - Does nothing if Git with branch "mock" already exists

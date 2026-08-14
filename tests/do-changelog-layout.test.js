@@ -6,6 +6,9 @@ import {rmSync} from 'node:fs';
 import * as _lib from './_lib.js';
 import {testOnlyExports} from '../cli.js';
 
+// @ts-ignore
+const _fileToArr=testOnlyExports().fileToArr;
+
 /** @type{string[]} */
 let changelogLines;
 const headerLines=['# Changelog'];
@@ -41,7 +44,7 @@ suite('Do: Changelog file layout',()=>{
       _lib.gitMockTag({tagname:'1.0.0'});
       _lib.gitMockCommit();
       _lib.runPkgCli();
-      changelogLines=_lib.fileToArr('CHANGELOG.md','last');
+      changelogLines=_fileToArr('CHANGELOG.md','last');
     }
     catch(err){
       console.log(err);
@@ -113,7 +116,7 @@ suite('Do: Changelog file layout',()=>{
         rmSync('package.json');
         _lib.mkPackageJson([['version',myVersion]]);
         _lib.runPkgCli();
-        const myChangelogLines=_lib.fileToArr('CHANGELOG.md','last');
+        const myChangelogLines=_fileToArr('CHANGELOG.md','last');
         if(myChangelogLines[i].slice(0,versionTitle.length)!==versionTitle) return false;
         return true;
       })(),
@@ -127,7 +130,7 @@ suite('Do: Changelog file layout',()=>{
         const myUrl='https://www.example.com';
         if(_lib.commonSpawn('git remote').stdout[0]==='') _lib.gitMockRemote(myUrl);
         _lib.runPkgCli();
-        changelogLines=_lib.fileToArr('CHANGELOG.md','last')
+        changelogLines=_fileToArr('CHANGELOG.md','last')
         for(let i=0; i<changelogLines.length; i++){
           if(new RegExp(/^ {0,2}- /).test(changelogLines[i])&&!new RegExp(String.raw `- \[[^\[]+\]\(`).test(changelogLines[i])) return false;
         }
@@ -144,7 +147,7 @@ suite('Do: Changelog file layout',()=>{
           _lib.commonSpawn('git remote remove '+value)
         })
         _lib.runPkgCli();
-        changelogLines=_lib.fileToArr('CHANGELOG.md','last')
+        changelogLines=_fileToArr('CHANGELOG.md','last')
         for(let i=0; i<changelogLines.length; i++){
           if(new RegExp(/^ {0,2}- /).test(changelogLines[i])&&new RegExp(String.raw `- \[[^\[]+\]\(`).test(changelogLines[i])) return false;
         }
