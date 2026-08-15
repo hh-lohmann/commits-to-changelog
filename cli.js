@@ -389,7 +389,7 @@ function evalNewestCommits(formattedCommits) {
       if(!pkg.version) return rej('The package.json for the current project does not contain a version key');
       let header=_settings.headerDefault;
       out+=EOL+'## ';
-      const latestTag=spawnSync('git',['log','--tags','-1','--format=%S'],{encoding:'utf8'}).stdout.split(EOL)[0];
+      const latestTag=spawnSync('git',['describe','--tags','--abbrev=0'],{encoding:'utf8'}).stdout.split(EOL)[0];
       if(latestTag){
         try{
           if(_compareSemver(pkg.version,latestTag)===2) rej(`Your package version (${pkg.version}) has a SemVer value that falls before your latest tag (${latestTag}).`);
