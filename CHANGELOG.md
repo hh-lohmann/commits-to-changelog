@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.2 (2026-08-15)
+
+- [Fix getting lastest tag: avoid wrong order / wrong branch = allowing multiple branches and restrospective tags](https://github.com/hh-lohmann/commits-to-changelog/commit/ee5dbd0)
+- [Change module system from CommonJS to ESM](https://github.com/hh-lohmann/commits-to-changelog/commit/317abad)
+
 ## 1.4.1 (2026-08-13)
 
 - [Feature: Replace dependency compare-versions by own function](https://github.com/hh-lohmann/commits-to-changelog/commit/ac95b03)
