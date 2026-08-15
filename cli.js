@@ -385,40 +385,23 @@ function setHeader(formattedCommits) {
 /** @type{(commits:any[])=>Promise<string[]>} */
 function evalNewestCommits(formattedCommits) {
   return new Promise((res, rej) => {
-    exec("git log --tags -1 --format=\"%d\"", (err, commit) => {
-      if (err) {
-        return rej(err);
+    if (!formattedCommits[0].tag) {
+      if(!pkg.version) return rej('The package.json for the current project does not contain a version key');
+      let header=_settings.headerDefault;
+      out+=EOL+'## ';
+      const latestTag=spawnSync('git',['log','--tags','-1','--format=%S'],{encoding:'utf8'}).stdout.split(EOL)[0];
+      if(latestTag){
+        try{
+          if(_compareSemver(pkg.version,latestTag)===2) rej(`Your package version (${pkg.version}) has a SemVer value that falls before your latest tag (${latestTag}).`);
+        }
+        catch(/**@type{any}*/err){
+          rej(`Your package version (${pkg.version}) cannot be processed: ${err.message}`);
+        }
+        if(pkg.version!==latestTag) header=pkg.version;
       }
-
-      let pkgVers = pkg.version,
-          tag,
-          latestTag = "0.0.0";
-
-      tag = commit.match(/tag: v?(\d{1,}\.\d{1,}\.\d{1,}[^,)]*)/);
-
-      if (tag) {
-        latestTag = tag[1].trim();
-      }
-
-      if(!pkgVers) return rej('The package.json for the current project does not contain a version key');
-
-      let comparePkgVersLatestTag;
-      try{
-        comparePkgVersLatestTag=_compareSemver(pkgVers,latestTag);
-      }
-      catch(/**@type{any}*/err){
-        return rej(`Your package version (${pkgVers}) cannot be processed: ${err.message}`);
-      }
-      if(comparePkgVersLatestTag===2){
-        return rej(`Your package version (${pkgVers}) has a SemVer value that falls before your latest tag (${latestTag}).`);
-      }
-
-      if (!formattedCommits[0].tag) {
-        out += EOL+`## ${pkgVers === latestTag ? _settings.headerDefault : pkgVers} (${getToday()})`+EOL+EOL;
-      }
-
-      res(formattedCommits);
-    });
+      out+=`${header} (${getToday()})`+EOL+EOL;
+    }
+    res(formattedCommits);
   });
 }
 
