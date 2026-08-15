@@ -29,7 +29,7 @@
   },
   "bugs": "https://github.com/hh-lohmann/commits-to-changelog/issues",
   "homepage": "https://hh-lohmann.github.io/commits-to-changelog",
-  "type": "commonjs",
+  "type": "module",
   "bin": {
     "commits-to-changelog": "cli.js"
   },

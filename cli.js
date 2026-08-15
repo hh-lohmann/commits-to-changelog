@@ -1,21 +1,26 @@
 #!/usr/bin/env node
 
-const { spawnSync } = require('node:child_process');
-const {existsSync}=require('node:fs');
-const {EOL}=require('node:os');
+// @ts-check
 
-let fs = require("fs"),
-    exec = require("child_process").exec,
-    pkg,
-    commitURI,
-    out;
+import {exec,spawnSync} from 'node:child_process';
+import {existsSync,readFileSync,writeFile} from 'node:fs';
+import {EOL} from 'node:os';
+import {sep} from 'node:path';
+import {open } from 'node:fs/promises';
+
+/** @type{any} */
+let pkg;
+/** @type{string} */
+let commitURI;
+/** @type{string} */
+let out;
 
 const progName='commits-to-changelog';
 
 /** Settings
  *  - Predefined values that may be overwritten via "commits-to-changelog" in
  *    a package.json belonging to the repo to make a changelog for
- * @param ~~name~~ - ~~short descripion~~
+ * @type{{[key:string]:any}}
  */
 const _settings={
   filterCommits:[],
@@ -24,15 +29,51 @@ const _settings={
   headerMerged: 'Include (results of) separate branch'
 }
 
-exports.testOnlyExports=function(){
-  const localTestsFolder=module.path+'/tests/';
+export const testOnlyExports=function(){
+  const localTestsFolder=import.meta.dirname+'/tests/';
   if(process.argv[1].slice(0,localTestsFolder.length)===localTestsFolder){
     return (
       {
-      _settings:_settings
+        brandMsg:brandMsg,
+        fileToArr:_fileToArr,
+        _settings:_settings
       }
     )
   }
+}
+
+/** Brand a message string by prefixing "<brand>: "
+ *  - Mainly for branding with name of current script / module
+ * @param msg: String: the message to brand
+ * @param brand: Optional: string: brand to prefix, default: name of current
+ *    script / module
+ * @type {(msg:string,brand?:string)=>string}
+*/
+const brandMsg=function(msg,brand){
+  if(!msg) msg='(no message)';
+  if(!brand) brand=import.meta.filename.split(sep).slice(-1)[0];
+  return brand+': '+msg;
+}
+
+/** Check if given textline is a Markdown header with given headertext
+ *  - headertext = string or flagless RegExp without atx-heading + ' '
+ *    - ! strings are handled verbatim as strings
+ *    - flagless: no `/gi` etc. (will be ignored if given)
+ * @example _checkIsMarkdownHeader('Examples')
+ * @example _checkIsMarkdownHeader('^.*Examples.*$')
+ * @param textline - verbatim textline
+ * @param headertext - see above
+ * @returns boolean
+ * @type {(textline:string,headertext:string|RegExp)=>boolean}
+ */
+const _checkIsMarkdownHeader=function(textline,headertext){
+  if(!textline) throw Error(progName+': _checkIsMarkdownHeader: No textline passed');
+  if(!headertext) throw Error(progName+': _checkIsMarkdownHeader: No headertext passed');
+  if(typeof textline!=='string') throw Error(progName+': _checkIsMarkdownHeader: Parameter "textline" must be a string');
+  if(typeof headertext!=='string'&&headertext.constructor.name!=='RegExp') throw Error(progName+': _checkIsMarkdownHeader: Parameter "headertext" must be a string or a RegExp');
+  let headertextSource=typeof headertext==='string'?headertext:headertext.source;
+  if(headertextSource.startsWith('^')) headertextSource=headertextSource.slice(1);
+  return new RegExp('^#{1,6} '+headertextSource).test(textline);
 }
 
 /** Check if a string is a non-labeled SemVer
@@ -47,6 +88,32 @@ const _checkNonLabeledSemver=function(version){
   if(!version) throw Error(progName+': _checkNonLabeledSemver: No version passed');
   if(typeof version!=='string') throw Error(progName+': _checkNonLabeledSemver: Parameter "version" must be a string');
   if(new RegExp(/^[0-9]+\.+[0-9]+\.+[0-9]+$/).test(version)) return true;
+  return false;
+}
+
+/** Check if given Markdown has a section identified by given headertext
+ *  - of course also if a README.md exists at all in same directory
+ *  - case insensitive
+ * @example _checkMarkdownHasSection(mdFile,headertext)
+ * @returns boolean
+ * @type {(mdFile:string,headertext:string)=>boolean}
+ */
+const _checkMarkdownHasSection=function(mdFile,headertext){
+  if(!mdFile) throw Error(progName+': _checkMarkdownHasSection: No mdFile passed');
+  if(!headertext) throw Error(progName+': _checkMarkdownHasSection: No headertext passed');
+  if(typeof mdFile!=='string') throw Error(progName+': _checkMarkdownHasSection: Parameter "mdFile" must be a string');
+  //@ts-ignore
+  if(typeof headertext!=='string'&&headertext.constructor.name!=='RegExp') throw Error(progName+': _checkMarkdownHasSection: Parameter "headertext" must be a string or a RegExp');
+  if(!existsSync(mdFile)) throw Error(progName+`: _checkMarkdownHasSection: Passed mdFile "${mdFile}" not found`);
+
+  (async () => {
+    console.log('WUGGA',mdFile);
+    const file = await open('./README.md');
+    for await (const line of file.readLines({encoding:'utf8'})) {
+      console.log('FUGGA',line);
+    }
+  })();
+  // ...
   return false;
 }
 
@@ -73,17 +140,45 @@ const _compareSemver=function(semver1,semver2){
   return 0;
 }
 
+/** Read utf8 text file into an array with lines as entries
+ * @example fileToArr('CHANGELOG.md')
+ * @example fileToArr('CHANGELOG.md','last')
+ * @param file - name / path of file to read
+ * @param removeEmptyLines - Optional: Remove empty lines: 'all' / 'last' /
+ *    'none' (default)
+ * @returns array with file lines as entries
+ * @type {(file:string,removeEmptyLines?:'all'|'last'|'none')=>string[]}
+ */
+const _fileToArr=function(file,removeEmptyLines){
+  if(typeof file==='undefined') throw Error(brandMsg(`fileToArr: Parameter "file" must not be undefined`));
+  if(typeof file!=='string') throw Error(brandMsg(`fileToArr: Parameter "file" must be a string`));
+  if(file==='') throw Error(brandMsg(`fileToArr: Parameter "file" must not be empty`));
+  if(!existsSync(file)) throw Error(brandMsg(`fileToArr: Passed file not retrievable: "${file}"`));
+  const removeEmptyLinesVals=['all','last','none'];
+  if(!removeEmptyLines) removeEmptyLines='none';
+  if(!removeEmptyLinesVals.includes(removeEmptyLines)) throw Error(brandMsg(`fileToArr: Parameter "removeEmptyLines" must be one of "${removeEmptyLinesVals.join('" / "')}"`));
+  const fileLines=
+    readFileSync(file,{encoding:'utf8'})
+    .split(EOL)
+  ;
+  if(removeEmptyLines==='all') return fileLines.filter(value=>value!=='');
+  if(removeEmptyLines==='last') return fileLines.slice(0,-1);
+  return fileLines;
+}
+
+/** @type{()=>string|undefined} */
 const _getRemoteRepoUrl=function(){
   const myBranch=spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
   if(!myBranch) throw Error(progName+': Could not get name of current branch');
   const myRemote=spawnSync('git',['config','branch.'+myBranch+'.remote'],{encoding:'utf8'}).stdout.replace(/\s/g,'');
   if(!myRemote) return undefined;
+  /** @type{any} */
   let myUrl=spawnSync('git',['remote','get-url',myRemote],{encoding:'utf8'}).stdout.replace(/\s/g,'')
   if(!myUrl) throw Error(progName+': Could not get URL for defined remote');
   try{
     myUrl=new URL(myUrl);
   }
-  catch(err){
+  catch(/** @type{any}*/err){
     let errCode=Object.hasOwn(err,'code')?` (code: ${err.code})`:'';
     throw Error(progName+': Invalid remote URL'+errCode);
   }
@@ -95,20 +190,19 @@ const _getRemoteRepoUrl=function(){
 const _checkIfGitRepo=function(){
   return new Promise((res, rej) => {
     if(spawnSync('git',['branch','--show-current'],{encoding:'utf8'}).stderr.includes('not a git repository')) rej(Error('Not a Git repository'));
-    res();
+    res(true);
   });
 }
 
 const _getPackageJson=function(){
   return new Promise((res, rej) => {
     if(!existsSync('package.json')) throw Error('No package.json found');
-    try{
-      pkg=require(process.cwd()+'/package.json');
-    }
-    catch(err) {
-      return rej(Error('package.json could not be loaded'));
-    }
-    res();
+    import(process.cwd()+'/package.json',{with:{type:'json'}})
+    .then(result=>{
+      pkg=result.default;
+      res(true);
+    })
+    .catch(err=>rej(Error('package.json could not be loaded')))
   });
 }
 
@@ -123,6 +217,8 @@ const _getPackageJson=function(){
  * @type {(string:string)=>RegExp}
  */
 const _stringToRegExp=function(string){
+  if(!string) throw Error(progName+': _stringToRegExp: No parameter passed');
+  if(typeof string!=='string') throw Error(progName+': _stringToRegExp: Parameter "string" must be a string or a RegExp');
   if(/^\//.test(string)) string=string.slice(1);
   if(/[^\\]\/$/.test(string)) string=string.slice(0,-1);
   return new RegExp(string);
@@ -134,15 +230,15 @@ const _getSettings=function(){
       Object.keys(pkg['commits-to-changelog']).forEach(value=>{
         _settings[value]=pkg['commits-to-changelog'][value];
       })
-      _settings.filterCommits=_settings.filterCommits.map(value=>_stringToRegExp(value));
+      _settings.filterCommits=_settings.filterCommits.map(/** @type{(value:string)=>RegExp} */ value=>_stringToRegExp(value));
     }
-    res();
+    res(true);
   });
 }
 
 const _getCommitURI=function(){
   return new Promise((res, rej) => {
-    let remoteRepoUrl='';
+    let remoteRepoUrl;
     try{
       remoteRepoUrl=_getRemoteRepoUrl();
     }
@@ -153,35 +249,38 @@ const _getCommitURI=function(){
       let dir = (remoteRepoUrl.includes("bitbucket") ? "/commits/" : "/commit/");
       commitURI = remoteRepoUrl + dir;
     }
-    res();
+    res(true);
   });
 }
 
-checkArgs()
-  .then(_checkIfGitRepo)
-  .then(_getPackageJson)
-  .then(_getSettings)
-  .then(_getCommitURI)
-  .then(getCommits)
-  .then(splitCommits)
-  .then(formatCommits)
-  .then(flagIndention)
-  .then(setHeader)
-  .then(evalNewestCommits)
-  .then(prepareOutput)
-  .then(save)
-  .catch(err => {
-    let errMsg = "";
 
-    errMsg += "+--------------------------------------------+"+EOL;
-    errMsg += "| There was an error creating your changelog |"+EOL;
-    errMsg += "+--------------------------------------------+"+EOL;
+if(process.argv[1]===import.meta.filename){
+  checkArgs()
+    .then(_checkIfGitRepo)
+    .then(_getPackageJson)
+    .then(_getSettings)
+    .then(_getCommitURI)
+    .then(getCommits)
+    .then(splitCommits)
+    .then(formatCommits)
+    .then(flagIndention)
+    .then(setHeader)
+    .then(evalNewestCommits)
+    .then(prepareOutput)
+    .then(save)
+    .catch(err => {
+      let errMsg = "";
 
-    console.error("\x1b[31m%s\x1b[0m", errMsg);
-    console.error(err + EOL);
+      errMsg += "+--------------------------------------------+"+EOL;
+      errMsg += "| There was an error creating your changelog |"+EOL;
+      errMsg += "+--------------------------------------------+"+EOL;
 
-    process.exit(1);
-  });
+      console.error("\x1b[31m%s\x1b[0m", errMsg);
+      console.error(err + EOL);
+
+      process.exit(1);
+    });
+}
 
 function checkArgs() {
   const args = process.argv.slice(2);
@@ -203,14 +302,17 @@ function getCommits() {
   });
 }
 
+/** @type{(commits:string)=>Promise<string[]>} */
 function splitCommits(commits) {
   return Promise.resolve(commits.trim().split(EOL));
 }
 
+/** @type{(commits:string[])=>Promise<any[]>} */
 function formatCommits(commits) {
+  /** @type{string} */
   let prevParent;
 
-  return Promise.resolve(commits.map(commit => {
+  return Promise.resolve(commits.map(/**@type{(commit:string)=>Object}*/commit => {
     let [date, refNames, hash, subject, parents] = commit.split("~>"),
         mergeCommitStart = false,
         mergeCommitEnd = false,
@@ -241,6 +343,7 @@ function formatCommits(commits) {
   }));
 }
 
+/** @type{(subject:string)=>string} */
 function encodeHTML(subject) {
   return subject
     .replace(/&/g, "&amp;")         // Encode ampersands
@@ -251,6 +354,7 @@ function encodeHTML(subject) {
     .replace(/`/g, "\\`");          // Escape back-ticks
 }
 
+/** @type{(commits:any[])=>Promise<string[]>} */
 function flagIndention(formattedCommits) {
   return Promise.resolve(formattedCommits.map((commit, i) => {
     if (i > 0) {
@@ -271,12 +375,14 @@ function flagIndention(formattedCommits) {
   }));
 }
 
+/** @type{(commits:any[])=>Promise<string[]>} */
 function setHeader(formattedCommits) {
   out = "# Changelog"+EOL;
 
   return Promise.resolve(formattedCommits);
 }
 
+/** @type{(commits:any[])=>Promise<string[]>} */
 function evalNewestCommits(formattedCommits) {
   return new Promise((res, rej) => {
     exec("git log --tags -1 --format=\"%d\"", (err, commit) => {
@@ -300,7 +406,7 @@ function evalNewestCommits(formattedCommits) {
       try{
         comparePkgVersLatestTag=_compareSemver(pkgVers,latestTag);
       }
-      catch(err){
+      catch(/**@type{any}*/err){
         return rej(`Your package version (${pkgVers}) cannot be processed: ${err.message}`);
       }
       if(comparePkgVersLatestTag===2){
@@ -322,10 +428,12 @@ function getToday() {
   return `${date.getFullYear()}-${prepend0(date.getMonth() + 1)}-${prepend0(date.getDate())}`;
 }
 
+/** @type{(val:number)=>string|number} */
 function prepend0(val) {
   return (val < 10 ? "0" + val : val);
 }
 
+/** @type{(formattedCommits:any[])=>Promise<boolean>} */
 function prepareOutput(formattedCommits) {
   if(_settings.filterDefaults) [ /^bump version$/, /^changelog$/, /^dev:/, /^[Hh]ousekeeping/, /^planning/, /[Rr]efactoring/, /tests/ ].forEach(value=>{_settings.filterCommits.push(value)});
   formattedCommits.forEach(commit => {
@@ -348,17 +456,17 @@ function prepareOutput(formattedCommits) {
     }
   });
 
-  return Promise.resolve();
+  return Promise.resolve(true);
 }
 
 function save() {
   return new Promise((res, rej) => {
-    fs.writeFile("./CHANGELOG.md", out, err => {
+    writeFile("./CHANGELOG.md", out, err => {
       if (err) {
         return rej(err);
       }
 
-      res();
+      res(true);
     });
   });
 }
