@@ -3,7 +3,7 @@
 // @ts-check
 
 import {exec,spawnSync} from 'node:child_process';
-import {existsSync,readFileSync,writeFile} from 'node:fs';
+import {appendFileSync, existsSync,readFileSync,writeFile,writeFileSync} from 'node:fs';
 import {EOL} from 'node:os';
 import {sep} from 'node:path';
 import {open } from 'node:fs/promises';
@@ -26,7 +26,8 @@ const _settings={
   filterCommits:[],
   filterDefaults: true,
   headerDefault: 'Current',
-  headerMerged: 'Include (results of) separate branch'
+  headerMerged: 'Include (results of) separate branch',
+  linesToReadme: 0
 }
 
 export const testOnlyExports=function(){
@@ -56,24 +57,57 @@ const brandMsg=function(msg,brand){
 }
 
 /** Check if given textline is a Markdown header with given headertext
- *  - headertext = string or flagless RegExp without atx-heading + ' '
+ *  - headertext = string or RegExp without atx-heading + ' '
  *    - ! strings are handled verbatim as strings
- *    - flagless: no `/gi` etc. (will be ignored if given)
+ *    - for RegExp flags like `/i` for "ignore case" are effective
  * @example _checkIsMarkdownHeader('Examples')
  * @example _checkIsMarkdownHeader('^.*Examples.*$')
- * @param textline - verbatim textline
+ * @param textline - verbatim textline, possibly empty line
  * @param headertext - see above
  * @returns boolean
  * @type {(textline:string,headertext:string|RegExp)=>boolean}
  */
 const _checkIsMarkdownHeader=function(textline,headertext){
-  if(!textline) throw Error(progName+': _checkIsMarkdownHeader: No textline passed');
+  if(typeof textline==='undefined') throw Error(progName+': _checkIsMarkdownHeader: No textline passed');
   if(!headertext) throw Error(progName+': _checkIsMarkdownHeader: No headertext passed');
   if(typeof textline!=='string') throw Error(progName+': _checkIsMarkdownHeader: Parameter "textline" must be a string');
   if(typeof headertext!=='string'&&headertext.constructor.name!=='RegExp') throw Error(progName+': _checkIsMarkdownHeader: Parameter "headertext" must be a string or a RegExp');
+  const headertextFlags=typeof headertext==='string'?'':headertext.flags;
   let headertextSource=typeof headertext==='string'?headertext:headertext.source;
   if(headertextSource.startsWith('^')) headertextSource=headertextSource.slice(1);
-  return new RegExp('^#{1,6} '+headertextSource).test(textline);
+  return new RegExp('^#{1,6} '+headertextSource,headertextFlags).test(textline);
+}
+
+/** Check if textsample marks first line not belonging to current section
+ *  - textsample instead of line to allow especially HTML comments that belong
+ *    not to the current section if not followed by an empty line
+ *    - ! multiline HTML comments have to be made to a oneliner before passing
+ *      them in a textsample
+ * @example _checkIsMarkdownSectionEnd([firstline,secondline])
+ * @param textsample - Array of lines
+ * @returns Index of (first) section end in textsample with special cases "-2"
+ *  = no matching section end, "-1" = empty sample = EOF = implicit section end
+ *    - Allows to determine the start position of a confirmed section end
+ *    - Check if ">-2" for a simple "section end found"
+ * @type {(textsample:string[])=>number}
+ */
+const _checkIsMarkdownSectionEnd=function(textsample){
+  if(typeof textsample==='undefined') throw Error(progName+': _checkIsMarkdownSectionEnd: No textsample passed');
+  if(textsample.constructor.name!=='Array') throw Error(progName+': _checkIsMarkdownSectionEnd: Parameter "textsample" must be an array');
+  let possiblyMatchingIndex=-1;
+  if(textsample.length===0) return possiblyMatchingIndex;
+  for(let i=0;i<textsample.length;i++){
+    ++possiblyMatchingIndex;
+    if(/^ {0,3}<!--[ \n\S]*-->/.test(textsample[i])){
+      --possiblyMatchingIndex;
+      continue;
+    }
+    if(/^ {0,3}#+ \w/.test(textsample[i])) return possiblyMatchingIndex;
+    // slightly overgenerating RegExp for HTML tags
+    // (note that the internet is full of undergenerating ones) 
+    if(/^ {0,3}<[a-z]+[ \S]*>/.test(textsample[i])) return possiblyMatchingIndex;
+  }
+  return -2;
 }
 
 /** Check if a string is a non-labeled SemVer
@@ -91,29 +125,26 @@ const _checkNonLabeledSemver=function(version){
   return false;
 }
 
-/** Check if given Markdown has a section identified by given headertext
- *  - of course also if a README.md exists at all in same directory
- *  - case insensitive
- * @example _checkMarkdownHasSection(mdFile,headertext)
- * @returns boolean
- * @type {(mdFile:string,headertext:string)=>boolean}
+/** Check if given Markdown file has a section identified by given headertext
+ *  - headertext = string or RegExp without atx-heading + ' '
+ *    - ! strings are handled verbatim as strings
+ *    - for RegExp flags like `/i` for "ignore case" are effective
+ * @example _checkMarkdownHasSection('README.md',/Changelog/i)
+ * @example _checkMarkdownHasSection('README.md','Changelog')
+ * @param mdFile - Markdown file 
+ * @param headertext - see above
+ * @returns Promise: boolean
+ * @type {(mdFile:string,headertext:string|RegExp)=>Promise<boolean>}
  */
-const _checkMarkdownHasSection=function(mdFile,headertext){
+const _checkMarkdownHasSection=async function(mdFile,headertext){
   if(!mdFile) throw Error(progName+': _checkMarkdownHasSection: No mdFile passed');
   if(!headertext) throw Error(progName+': _checkMarkdownHasSection: No headertext passed');
   if(typeof mdFile!=='string') throw Error(progName+': _checkMarkdownHasSection: Parameter "mdFile" must be a string');
-  //@ts-ignore
   if(typeof headertext!=='string'&&headertext.constructor.name!=='RegExp') throw Error(progName+': _checkMarkdownHasSection: Parameter "headertext" must be a string or a RegExp');
-  if(!existsSync(mdFile)) throw Error(progName+`: _checkMarkdownHasSection: Passed mdFile "${mdFile}" not found`);
-
-  (async () => {
-    console.log('WUGGA',mdFile);
-    const file = await open('./README.md');
-    for await (const line of file.readLines({encoding:'utf8'})) {
-      console.log('FUGGA',line);
-    }
-  })();
-  // ...
+  if(!existsSync(mdFile)) throw Error(progName+`: _checkMarkdownHasSection: Requested file "${mdFile}" not found`);
+  for await (const line of (await open(mdFile)).readLines({encoding:'utf8'})) {
+    if(_checkIsMarkdownHeader(line,headertext)) return true;
+  }
   return false;
 }
 
@@ -164,6 +195,89 @@ const _fileToArr=function(file,removeEmptyLines){
   if(removeEmptyLines==='all') return fileLines.filter(value=>value!=='');
   if(removeEmptyLines==='last') return fileLines.slice(0,-1);
   return fileLines;
+}
+/** Get Markdown before and after a section identified by given headertext
+ *  - "before" including the matching headertext line
+ *  - headertext = string or RegExp without atx-heading + ' '
+ *    - ! strings are handled verbatim as strings
+ *    - for RegExp flags like `/i` for "ignore case" are effective
+ * @example _getMarkdownBeforeAfterSection('README.md',/Changelog/i)
+ * @example _getMarkdownBeforeAfterSection('README.md','Changelog')
+ * @param mdFile - Markdown file to read
+ * @param headertext - see above
+ * @param startPos - Optional: Position in mdFile to start from, default: 0
+ * @returns Promise: Object with keys 'found' / 'before' / 'after'
+ * @type {(mdFile:string,headertext:string|RegExp,startPos?:number)=>Promise<{found:boolean,before:string,after:string}>}
+ */
+const _getMarkdownBeforeAfterSection=async function(mdFile,headertext,startPos=0){
+  if(!mdFile) throw Error(progName+': _getMarkdownBeforeAfterSection: No mdFile passed');
+  if(!headertext) throw Error(progName+': _getMarkdownBeforeAfterSection: No headertext passed');
+  if(typeof mdFile!=='string') throw Error(progName+': _getMarkdownBeforeAfterSection: Parameter "mdFile" must be a string');
+  if(typeof headertext!=='string'&&headertext.constructor.name!=='RegExp') throw Error(progName+': _getMarkdownBeforeAfterSection: Parameter "headertext" must be a string or a RegExp');
+  if(!existsSync(mdFile)) throw Error(progName+`: _getMarkdownBeforeAfterSection: Requested file "${mdFile}" not found`);
+  const myResult={found:false,before:'',after:''};
+  let bytePos=startPos;
+  for await (const line of (await open(mdFile)).readLines({encoding:'utf8',start:startPos})) {
+    myResult.before+=line+EOL;
+    bytePos+=line.length+EOL.length;
+    if(_checkIsMarkdownHeader(line,headertext)){
+      myResult.found=true;
+      break;
+    }
+  }
+  if(myResult.found){
+    const posSectionEnd=await _getPosMarkdownSectionEnd(mdFile,bytePos);
+    for await (const line of (await open(mdFile)).readLines({encoding:'utf8',start:posSectionEnd})) {
+      myResult.after+=line+EOL;
+      bytePos+=line.length+EOL.length;
+    }
+  }
+  if(!myResult.found) myResult.before=myResult.after='';
+  return myResult;
+}
+
+/** Get position of next section end in Markdown file
+ *  - E.g. to read file contents until or from that position
+ * @example _getPosMarkdownSectionEnd('README.md')
+ * @example _getPosMarkdownSectionEnd('README.md',0)
+ * @example _getPosMarkdownSectionEnd('README.md',306)
+ * @param mdFile - Markdown file to search in
+ * @param startPos - Optional: Position in mdFile to start, default: 0
+ * @returns Byte position of found section end, "-1" for EOF as trivial
+ *    section end
+ * @type {(mdFile:string,startPos?:number)=>Promise<number>}
+ */
+const _getPosMarkdownSectionEnd=async function(mdFile,startPos=0){
+  let bytePos=startPos;
+  /** @type{(result:number)=>number} */
+  const calcMatchingBytePos=function(result=-2){
+    for(let i=result;i>-1&&i<textsample.length;i++){
+      bytePos-=(textsample[i].length+EOL.length);
+    }
+    return bytePos;
+  }
+  let result=-2;
+  /** @type {string[]} */
+  let textsample=[];
+  for await (const line of (await open(mdFile)).readLines({encoding:'utf8',start:startPos})) {
+    if(textsample.length===2){
+      result=_checkIsMarkdownSectionEnd(textsample);
+      if(result>-2) return calcMatchingBytePos(result);
+      textsample=[textsample[1],line];
+    }
+    if(textsample.length===1) textsample=[textsample[0],line];
+    if(textsample.length===0) textsample=[line];
+    bytePos+=line.length+EOL.length;
+  }
+  /** @type {string|undefined } */
+  let removedLine;
+  while(textsample.length>0){
+    result=_checkIsMarkdownSectionEnd(textsample);
+    if(result>-2) return calcMatchingBytePos(result);
+    removedLine=textsample.pop();
+    if(removedLine)bytePos-=removedLine.length;
+  }
+  return -1;
 }
 
 /** @type{()=>string|undefined} */
@@ -232,6 +346,7 @@ const _getSettings=function(){
       })
       _settings.filterCommits=_settings.filterCommits.map(/** @type{(value:string)=>RegExp} */ value=>_stringToRegExp(value));
     }
+    if(_settings.filterDefaults) [ /^bump version$/, /^changelog$/, /^dev:/, /^[Hh]ousekeeping/, /^planning/, /[Rr]efactoring/, /tests/ ].forEach(value=>{_settings.filterCommits.push(value)});
     res(true);
   });
 }
@@ -253,6 +368,15 @@ const _getCommitURI=function(){
   });
 }
 
+/** @type{(err:string|Error)=>void} */
+const _errConsole=function(err){
+  console.log();
+  console.log('+--------------------------------------------+');
+  console.log('| There was an error creating your changelog |');
+  console.log('+--------------------------------------------+');
+  console.error(err.toString());
+  console.log();
+}
 
 if(process.argv[1]===import.meta.filename){
   checkArgs()
@@ -263,21 +387,18 @@ if(process.argv[1]===import.meta.filename){
     .then(getCommits)
     .then(splitCommits)
     .then(formatCommits)
+    .then((res)=>{
+      _linesToReadme(res)
+      .catch(err=>_errConsole(err));
+      return res;
+    })
     .then(flagIndention)
     .then(setHeader)
     .then(evalNewestCommits)
     .then(prepareOutput)
     .then(save)
     .catch(err => {
-      let errMsg = "";
-
-      errMsg += "+--------------------------------------------+"+EOL;
-      errMsg += "| There was an error creating your changelog |"+EOL;
-      errMsg += "+--------------------------------------------+"+EOL;
-
-      console.error("\x1b[31m%s\x1b[0m", errMsg);
-      console.error(err + EOL);
-
+      _errConsole(err);
       process.exit(1);
     });
 }
@@ -307,7 +428,7 @@ function splitCommits(commits) {
   return Promise.resolve(commits.trim().split(EOL));
 }
 
-/** @type{(commits:string[])=>Promise<any[]>} */
+/** @type{(commits:string[])=>Promise<object[]>} */
 function formatCommits(commits) {
   /** @type{string} */
   let prevParent;
@@ -352,6 +473,42 @@ function encodeHTML(subject) {
     .replace(/]/g, "\\]")           // Escape right-brackets
     .replace(/(?!.*])\[/g, "&#91;") // Encode left-brackets (if no right-brackets are present)
     .replace(/`/g, "\\`");          // Escape back-ticks
+}
+
+/** @type{(subject:string)=>boolean} */
+const _filterOutCommit=function(subject){
+  for(const filter of _settings.filterCommits){
+    if(new RegExp(filter).test(subject)) return true;
+  }
+  return false;
+}
+
+/** @type{(commits:any[])=>Promise<void>} */
+async function _linesToReadme(formattedCommits) {
+  if(!_settings.linesToReadme) return;
+  let linesToCheck=parseInt(_settings.linesToReadme);
+  if(isNaN(linesToCheck)) throw Error(progName+': _linesToReadme: Setting "linesToReadme" must be a number');
+  if(linesToCheck<1) return;
+  if(!existsSync('README.md')) throw Error(progName+': _linesToReadme: No "README.md" given');
+  const markdownBeforeAfter=await _getMarkdownBeforeAfterSection('README.md',/Changelog/i);
+  if(!markdownBeforeAfter.found) throw Error(progName+': _linesToReadme: No section "Changelog" (case insensitive) in README.md found');
+  writeFileSync('README.md',markdownBeforeAfter.before);
+  appendFileSync('README.md',EOL);
+  appendFileSync('README.md',`*Last ${_settings.linesToReadme} changes - see [CHANGELOG file](CHANGELOG.md) for full list and details*${EOL}`);
+  appendFileSync('README.md',EOL);
+  let tag='';
+  let versionStamp='';
+  for(let i=0;i<linesToCheck&&i<formattedCommits.length;i++){
+    if(formattedCommits[i].tag) tag=formattedCommits[i].tag;
+    versionStamp=tag?tag:formattedCommits[i].date+' '+formattedCommits[i].hash;
+    if(_filterOutCommit(formattedCommits[i].subject)){
+      linesToCheck++;
+      continue;
+    }
+    appendFileSync('README.md',`  * (${versionStamp}) ${formattedCommits[i].subject}${EOL}`);
+  }
+  appendFileSync('README.md',EOL+EOL);
+  appendFileSync('README.md',markdownBeforeAfter.after);
 }
 
 /** @type{(commits:any[])=>Promise<string[]>} */
@@ -418,7 +575,6 @@ function prepend0(val) {
 
 /** @type{(formattedCommits:any[])=>Promise<boolean>} */
 function prepareOutput(formattedCommits) {
-  if(_settings.filterDefaults) [ /^bump version$/, /^changelog$/, /^dev:/, /^[Hh]ousekeeping/, /^planning/, /[Rr]efactoring/, /tests/ ].forEach(value=>{_settings.filterCommits.push(value)});
   formattedCommits.forEach(commit => {
     if (commit.tag) {
       out += EOL+`## ${commit.tag} (${commit.date})`+EOL+EOL;

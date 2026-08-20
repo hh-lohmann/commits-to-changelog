@@ -1,12 +1,15 @@
 {
   "name": "commits-to-changelog",
-  "commits-to-changelog": {},
+  "commits-to-changelog": {
+    "filterCommits": [ "trying" ],
+    "linesToReadme": "5"
+  },
   "description": "Create an unopionated CHANGELOG.md from Git commit history",
   "author": {
     "name": "hh lohmann",
     "email": "hh.lohmann@gmail.com"
   },
-  "version": "1.4.2",
+  "version": "1.5.0",
   "keywords": [
     "changelog",
     "log",
