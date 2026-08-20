@@ -378,7 +378,7 @@ const _errConsole=function(err){
   console.log();
 }
 
-if(process.argv[1]===import.meta.filename){
+if(process.argv[1].split(sep).slice(-1)[0]==='cli.js'){
   checkArgs()
     .then(_checkIfGitRepo)
     .then(_getPackageJson)
