@@ -9,6 +9,10 @@ test( 'Exit: Error comparing versions',()=> {
   _lib.mkPackageJson([['version','invalid']]);
   _lib.gitMockRemote('htts://www.example.com');
   _lib.gitMockCommit();
-  assert(_lib.commonSpawnErrContains(/package version [^\n]+ cannot be processed/,_lib.runPkgCli()));
+  _lib.gitMockTag();
+  assert(
+    _lib.commonSpawnErrContains(/package version [^\n]+ cannot be processed/,_lib.runPkgCli()),
+    'see '+tstdir
+  );
   _lib.rmDir(tstdir);
 });

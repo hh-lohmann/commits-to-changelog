@@ -9,7 +9,11 @@ test( 'Exit: Package version falls before latest tag',()=> {
   _lib.mkPackageJson([['version','1.0.0']]);
   _lib.gitMockRemote('htts://www.example.com');
   _lib.gitMockCommit();
-  _lib.commonSpawn('git tag 2.0.0');
-  assert(_lib.commonSpawnErrContains('has a SemVer value that falls before',_lib.runPkgCli()));
+  _lib.gitMockTag({tagname:'2.0.0'});
+  _lib.gitMockCommit();
+  assert(
+    _lib.commonSpawnErrContains('has a SemVer value that falls before',_lib.runPkgCli()),
+    'see '+tstdir
+  );
   _lib.rmDir(tstdir);
 });

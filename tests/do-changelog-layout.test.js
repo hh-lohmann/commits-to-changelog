@@ -95,7 +95,7 @@ suite('Do: Changelog file layout',()=>{
     );
   });
 
-  test(`Title of group for commits after last tag starts with _settings.headerDefault (current: "${testOnlyExports()?._settings.headerDefault}") + " " if pkgVers matches last tag`,()=> {
+  test(`Title of group for commits newer than last tag starts with _settings.headerDefault (current: "${testOnlyExports()?._settings.headerDefault}") + " " if pkgVers matches last tag`,()=> {
     assert(
       (()=>{
         const searchString='## '+testOnlyExports()?._settings.headerDefault+ ' ';
@@ -107,7 +107,7 @@ suite('Do: Changelog file layout',()=>{
     );
   });
 
-  test( 'Title of group for commits after last tag is pkgVers if this does not match last tag',()=> {
+  test( 'Title of group for commits newer than last tag is pkgVers if this does not match last tag',()=> {
     assert(
       (()=>{
         const myVersion='2.0.0';
