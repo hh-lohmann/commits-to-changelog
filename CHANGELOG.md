@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.0 (2026-08-20)
+
+- [Feature: Write newest changelog entries also to README.md in same directory if this has a section Changelog (case insensitive), number of entries via setting, default: 0 = do not try to write to README.md](https://github.com/hh-lohmann/commits-to-changelog/commit/6e11061)
+
 ## 1.4.2 (2026-08-15)
 
 - [Fix getting lastest tag: avoid wrong order / wrong branch = allowing multiple branches and restrospective tags](https://github.com/hh-lohmann/commits-to-changelog/commit/ee5dbd0)

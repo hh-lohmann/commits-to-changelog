@@ -28,7 +28,14 @@ Create an unopionated CHANGELOG.md from Git commit history
 
 ## Changelog
 
-<!-- to be filled by commits-to-changelog -->
+*Last 5 changes - see [CHANGELOG file](CHANGELOG.md) for full list and details*
+
+  * (1.5.0) Feature: Write newest changelog entries also to README.md in same directory if this has a section Changelog (case insensitive), number of entries via setting, default: 0 = do not try to write to README.md
+  * (1.4.2) Fix getting lastest tag: avoid wrong order / wrong branch = allowing multiple branches and restrospective tags
+  * (1.4.2) Change module system from CommonJS to ESM
+  * (1.4.1) Feature: Replace dependency compare-versions by own function
+  * (1.4.0) Filter commits: Exclude commits / commit types via RegExp against commit messages
+
 
 ## Synopsis
 
