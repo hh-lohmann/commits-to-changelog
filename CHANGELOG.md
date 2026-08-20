@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1 (2026-08-20)
+
+- [HOTFIX: Internal execution control did not work with global installation](https://github.com/hh-lohmann/commits-to-changelog/commit/7db530c)
+
 ## 1.5.0 (2026-08-20)
 
 - [Feature: Write newest changelog entries also to README.md in same directory if this has a section Changelog (case insensitive), number of entries via setting, default: 0 = do not try to write to README.md](https://github.com/hh-lohmann/commits-to-changelog/commit/6e11061)
