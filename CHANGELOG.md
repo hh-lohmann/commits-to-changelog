@@ -1,5 +1,12 @@
 # Changelog
 
+## Current (2026-08-21)
+
+- [Feature: Allow to have no package.json at all](https://github.com/hh-lohmann/commits-to-changelog/commit/e89db26)
+- [Feature: Allow non-semver tags](https://github.com/hh-lohmann/commits-to-changelog/commit/ee36b3f)
+- [Feature: Allow to have no package.json version = use package.json version only if given](https://github.com/hh-lohmann/commits-to-changelog/commit/e6aed9f)
+- [Feature: Compare pkg.version and latestTag only for possible headerDefault change only if both are non-labeled SemVer](https://github.com/hh-lohmann/commits-to-changelog/commit/12bf3fc)
+
 ## 1.5.1 (2026-08-20)
 
 - [HOTFIX: Internal execution control did not work with global installation](https://github.com/hh-lohmann/commits-to-changelog/commit/7db530c)

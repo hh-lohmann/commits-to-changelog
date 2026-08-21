@@ -2,19 +2,14 @@
 
 # commits-to-changelog
 
-Create an unopionated CHANGELOG.md from Git commit history
+Create an unopionated CHANGELOG.md from Git commit history (see [Details](#details))
 
 * Creates CHANGELOG.md on each run from scratch, i.e. an existing on will be overwritten
 * Optionally writes defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md (see [linesToReadme](#linestoreadme) under [Settings](#settings))
 * Commits that are rather not relevant for users, e.g. "bump version" / changelog" / addressing "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be [defined](#filtercommits) as as [setting](#settings)
   * I.e. no pressure to spoof commits or history to get a nice CHANGELOG
-* Requires a package.json file in the repo for which a CHANGELOG.md should be created to retrieve version information, but the repo need not be really a Node package, see [Details](#details)
-* If a [Git remote](#git-working-with-remotes-showing-your-remotes) is defined with an HTTPS URL this will be used (with some cleanup) for commit links (the remote is usually a GitHub repo from which the project is cloned from / pushes to, also GitLab / Bitbucket are possible)
-* If Git tags exist these will be used for structuring the changes.
 * Special handling of [Merged Branches](#merged-branches)
 * Does explicitly not do any magic based on things [Conventional Commits](#conventional-commits) to keep it compatible with less organized repos, but of course you should use commit conventions.
-
-> Note that this is a fork of the ingenious [git-to-changelog](#git-to-changelog) with [some adjustments](#details).
 
 *[hh lohmann &lt;hh.lohmann@gmail.com&gt;](mailto:hh.lohmann@gmail.com?subject=commits-to-changelog)*
 
@@ -30,11 +25,11 @@ Create an unopionated CHANGELOG.md from Git commit history
 
 *Last 5 changes - see [CHANGELOG file](CHANGELOG.md) for full list and details*
 
+  * (2026-08-21 e89db26) Feature: Allow to have no package.json at all
+  * (2026-08-21 ee36b3f) Feature: Allow non-semver tags
+  * (2026-08-21 e6aed9f) Feature: Allow to have no package.json version = use package.json version only if given
+  * (2026-08-21 12bf3fc) Feature: Compare pkg.version and latestTag only for possible headerDefault change only if both are non-labeled SemVer
   * (1.5.1) HOTFIX: Internal execution control did not work with global installation
-  * (1.5.0) Feature: Write newest changelog entries also to README.md in same directory if this has a section Changelog (case insensitive), number of entries via setting, default: 0 = do not try to write to README.md
-  * (1.4.2) Fix getting lastest tag: avoid wrong order / wrong branch = allowing multiple branches and restrospective tags
-  * (1.4.2) Change module system from CommonJS to ESM
-  * (1.4.1) Feature: Replace dependency compare-versions by own function
 
 
 ## Synopsis
@@ -187,19 +182,47 @@ Pick for your preferred package manager:
 
 ## Details
 
-* Node's package.json file concept is used to retrieve / store a version information for the repo for which a CHANGELOG.md should be created and optional [Settings](#settings) for creation. Minimal requirement is a valid version string like e.g.
-  ```json
-  {
-    "version": "1.2.3"
-  }
-  ```
+The resulting CHANGELOG.md has the simple structure
 
-* The (initial) code here is forked from [git-to-changelog](#git-to-changelog) that is already a very good solution, but due to a hardwired search path '../../package.json' - mimicking npm's way of structuring a `node_modules` folder - does not work with pnpm, and while fixing this some other little things were changed / improved (see [CHANGELOG](https://github.com/hh-lohmann/commits-to-changelog/blob/release/CHANGELOG.md)) and made the initial little fix grow into an own project
+```
+# Changelog
+
+## {groupheader} ({date})
+
+- [{commit-subject}]({commit-link})
+- [{commit-subject}]({commit-link})
+
+## {groupheader} ({date})
+
+- [{commit-subject}]({commit-link})
+- [{commit-subject}]({commit-link})
+
+(...)
+
+```
+
+where `# Changelog` is the **title**, a Markdown [atx heading](#commonmark-spec-atx-headings) (i.e. using "#") of level 1 with the text "Changelog", followed by an empty line, and lists of commits that are **grouped** by
+
+  1. if given: a Git tag they are associated with
+  2. if no Git tag associated: an existing package.json version if this is [a non-labeled SemVer](#non-labeled-semver) and is newer than an existing previous tag that is also a non-labeled SemVer
+  3. if none of the above applies: the [headerDefault](#headerdefault) (see [Settings](#settings))
+
+so that the applicable Git tag / package.json version or the headerDefault becomes the `{groupheader}` that together with the date of the Git tag or else the current date constitutes a Markdown heading of level 2 under which **associated commits** are listed as
+
+  1. if a [Git remote](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
+  1. if no Git remote is given: the subject of the commit only
+
+Besides the existence and characteristics of Git tags, a possible package.json and Git remote defintions the actually resulting CHANGELOG.md can be shaped by [Settings](#settings).
 
 
 ## Source Code
 
   * GitHub: <https://github.com/hh-lohmann/commits-to-changelog>
+
+
+## Prior Work
+
+The (initial) code here is forked from [git-to-changelog](#git-to-changelog), an already very good solution, but due to a hardwired search path '../../package.json' - mimicking npm's way of structuring a `node_modules` folder - not usable with pnpm, and while fixing this some other little things were changed / improved (see [CHANGELOG](https://hh-lohmann.github.io/commits-to-changelog/CHANGELOG)) and made the initial little fix grow into an own project
 
 
 ## License
@@ -209,20 +232,30 @@ Pick for your preferred package manager:
 
 ## References
 
+### CommonMark Spec: ATX headings
+  * <https://spec.commonmark.org/0.31.2/#atx-headings>
+
 ### Conventional Commits
   * <https://www.conventionalcommits.org>
+
+### Git commmit subject
+  * The first line of a commit message that is separated from the body of the message by an empty line (identical to the whole message if this have empty line)
+  * cf. Git's example for a commit_template: <https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_commit_template>
+
+### Git: diff
+  * <https://git-scm.com/docs/git-diff>
+
+### Git: Working with Remotes: Showing Your Remotes
+  * <https://git-scm.com/book/ms/v2/Git-Basics-Working-with-Remotes#_showing_your_remotes>
 
 ### git-to-changelog
   * npm registry: <https://www.npmjs.com/package/git-to-changelog>
   * npmx: <https://npmx.dev/package/git-to-changelog>
   * repo: <https://github.com/Grafluxe/git-to-changelog>
 
-### Git: Working with Remotes: Showing Your Remotes
-  * <https://git-scm.com/book/ms/v2/Git-Basics-Working-with-Remotes#_showing_your_remotes>
-
-### Semantic Versioning: Pre-release versions
-  * <https://semver.org/#spec-item-9>
-
+### Non-labeled SemVer
+  * A semantic version (SemVer) that has *no* "labels for pre-release and build metadata (...) as extensions to the MAJOR.MINOR.PATCH format"
+  * <https://semver.org/#:~#:~:text=Additional%20labels%20for%20pre%2Drelease%20and%20build%20metadata%20are%20available>
 
 
 <!-- see https://hh-lohmann.github.io/html-endspacer -->
