@@ -543,10 +543,9 @@ function setHeader(formattedCommits) {
 function evalNewestCommits(formattedCommits) {
   return new Promise((res, rej) => {
     if (!formattedCommits[0].tag) {
-      if(!pkg.version) return rej('The package.json for the current project does not contain a version key');
       let header=_settings.headerDefault;
       out+=EOL+'## ';
-      if(_checkNonLabeledSemver(pkg.version)){
+      if(pkg.version&&_checkNonLabeledSemver(pkg.version)){
         const latestTag=spawnSync('git',['describe','--tags','--abbrev=0'],{encoding:'utf8'}).stdout.split(EOL)[0];
         if(latestTag&&_checkNonLabeledSemver(latestTag)){
           if(_compareSemver(pkg.version,latestTag)===2) rej(`Your package version (${pkg.version}) has a SemVer value that falls before your latest tag (${latestTag}).`);
