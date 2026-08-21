@@ -1,7 +1,9 @@
 # Changelog
 
-## Current (2026-08-21)
+## 1.6.0 (2026-08-21)
 
+- [Typo](https://github.com/hh-lohmann/commits-to-changelog/commit/39a7a81)
+- [Update README](https://github.com/hh-lohmann/commits-to-changelog/commit/cfadf7a)
 - [Feature: Allow to have no package.json at all](https://github.com/hh-lohmann/commits-to-changelog/commit/e89db26)
 - [Feature: Allow non-semver tags](https://github.com/hh-lohmann/commits-to-changelog/commit/ee36b3f)
 - [Feature: Allow to have no package.json version = use package.json version only if given](https://github.com/hh-lohmann/commits-to-changelog/commit/e6aed9f)

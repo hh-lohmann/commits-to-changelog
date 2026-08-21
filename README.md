@@ -25,11 +25,11 @@ Create an unopionated CHANGELOG.md from Git commit history (see [Details](#detai
 
 *Last 5 changes - see [CHANGELOG file](CHANGELOG.md) for full list and details*
 
-  * (2026-08-21 e89db26) Feature: Allow to have no package.json at all
-  * (2026-08-21 ee36b3f) Feature: Allow non-semver tags
-  * (2026-08-21 e6aed9f) Feature: Allow to have no package.json version = use package.json version only if given
-  * (2026-08-21 12bf3fc) Feature: Compare pkg.version and latestTag only for possible headerDefault change only if both are non-labeled SemVer
-  * (1.5.1) HOTFIX: Internal execution control did not work with global installation
+  * (1.6.0) Typo
+  * (1.6.0) Update README
+  * (1.6.0) Feature: Allow to have no package.json at all
+  * (1.6.0) Feature: Allow non-semver tags
+  * (1.6.0) Feature: Allow to have no package.json version = use package.json version only if given
 
 
 ## Synopsis
