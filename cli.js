@@ -310,7 +310,8 @@ const _checkIfGitRepo=function(){
 
 const _getPackageJson=function(){
   return new Promise((res, rej) => {
-    if(!existsSync('package.json')) throw Error('No package.json found');
+    // if(!existsSync('package.json')) throw Error('No package.json found');
+    if(!existsSync('package.json')) res(false);
     import(process.cwd()+'/package.json',{with:{type:'json'}})
     .then(result=>{
       pkg=result.default;
@@ -340,11 +341,13 @@ const _stringToRegExp=function(string){
 
 const _getSettings=function(){
   return new Promise((res, rej) => {
-    if(Object.hasOwn(pkg,'commits-to-changelog')){
-      Object.keys(pkg['commits-to-changelog']).forEach(value=>{
-        _settings[value]=pkg['commits-to-changelog'][value];
-      })
-      _settings.filterCommits=_settings.filterCommits.map(/** @type{(value:string)=>RegExp} */ value=>_stringToRegExp(value));
+    if(pkg){
+      if(Object.hasOwn(pkg,'commits-to-changelog')){
+        Object.keys(pkg['commits-to-changelog']).forEach(value=>{
+          _settings[value]=pkg['commits-to-changelog'][value];
+        })
+        _settings.filterCommits=_settings.filterCommits.map(/** @type{(value:string)=>RegExp} */ value=>_stringToRegExp(value));
+      }
     }
     if(_settings.filterDefaults) [ /^bump version$/, /^changelog$/, /^dev:/, /^[Hh]ousekeeping/, /^planning/, /[Rr]efactoring/, /tests/ ].forEach(value=>{_settings.filterCommits.push(value)});
     res(true);
@@ -535,7 +538,7 @@ function evalNewestCommits(formattedCommits) {
     if (!formattedCommits[0].tag) {
       let header=_settings.headerDefault;
       out+=EOL+'## ';
-      if(pkg.version&&_checkNonLabeledSemver(pkg.version)){
+      if(pkg&&pkg.version&&_checkNonLabeledSemver(pkg.version)){
         const latestTag=spawnSync('git',['describe','--tags','--abbrev=0'],{encoding:'utf8'}).stdout.split(EOL)[0];
         if(latestTag&&_checkNonLabeledSemver(latestTag)){
           if(_compareSemver(pkg.version,latestTag)===2) rej(`Your package version (${pkg.version}) has a SemVer value that falls before your latest tag (${latestTag}).`);
