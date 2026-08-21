@@ -87,7 +87,7 @@ String to use as header for listing commits that do not belong to a defined Git 
 String to use as header for listing [Merged Branches](#merged-branches) with a commit message of the form `Merge branch '<branch name>'`
   * Default: "Include (results of) separate branch"
 
-### linesToReadme
+#### linesToReadme
 Write defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md
   * Existing section content is overwritten
   * Short entry form with link to full CHANGELOG.md
