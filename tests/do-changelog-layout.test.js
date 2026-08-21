@@ -171,7 +171,7 @@ suite('Do: Changelog file layout',()=>{
   });
 
   after(()=> {
-    // _lib.rmDir(tstdir);
+    _lib.rmDir(tstdir);
   });
 
 })
