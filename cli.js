@@ -413,7 +413,7 @@ function checkArgs() {
 
 function getCommits() {
   return new Promise((res, rej) => {
-    exec("git log --topo-order --date=short --format=\"%cd~>%d~>%h~>%s~>%p\"", (err, commits) => {
+    exec("git log --topo-order --date=short --format=\"%cd~>%D~>%h~>%s~>%p\"", (err, commits) => {
       if (err) {
         return rej(err);
       }
@@ -436,19 +436,9 @@ function formatCommits(commits) {
   return Promise.resolve(commits.map(/**@type{(commit:string)=>Object}*/commit => {
     let [date, refNames, hash, subject, parents] = commit.split("~>"),
         mergeCommitStart = false,
-        mergeCommitEnd = false,
-        validTag,
-        tag;
-
-    if (refNames && refNames.includes("tag:")) {
-      validTag = refNames.match(/tag: v?(\d{1,}\.\d{1,}\.\d{1,}[^,)]*)/);
-
-      if (validTag) {
-        tag = validTag[1].trim();
-      }
-    } else {
-      tag = null;
-    }
+        mergeCommitEnd = false;
+    let tag=null;
+    refNames.split(', ').forEach(value=>{if(value.startsWith('tag: ')) tag=value.split('tag: ')[1]})
 
     if (parents && parents.includes(" ")) {
       mergeCommitStart = true;
