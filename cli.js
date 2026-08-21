@@ -349,7 +349,7 @@ const _getSettings=function(){
         _settings.filterCommits=_settings.filterCommits.map(/** @type{(value:string)=>RegExp} */ value=>_stringToRegExp(value));
       }
     }
-    if(_settings.filterDefaults) [ /^bump version$/, /^changelog$/, /^dev:/, /^[Hh]ousekeeping/, /^planning/, /[Rr]efactoring/, /tests/ ].forEach(value=>{_settings.filterCommits.push(value)});
+    if(_settings.filterDefaults) [ /^bump version$/i, /^changelog$/i, /^dev:/i, /^[Hh]ousekeeping/i, /^planning/i, /[Rr]efactoring/i, /tests/i ].forEach(value=>{_settings.filterCommits.push(value)});
     res(true);
   });
 }

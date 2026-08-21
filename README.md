@@ -75,7 +75,7 @@ Array of RegExp: Filter out commits / commit types identified by a message match
   * Since JSON has no own type for them, RegExps have to be defined as strings, unlike vanilla JavaScript filterCommits does handle e.g. `^exp$` exactly like `/^exp$/` (i,e. interprets unquoted `/` at start and end as RegExp delimiters, not as literal `/` part of the RegExp)
 
 #### filterDefaults
-Boolean: Filter out commit types that are rather not relevant for users by matching commit messages against RegExps `/^bump version$/`, `/^changelog$/`, `/^dev:/`, `/^[Hh]ousekeeping/`, `/^planning/`, `/[Rr]efactoring/`, `/tests/`
+Boolean: Filter out commit types that are rather not relevant for users by matching commit messages against RegExps `/^bump version$/i`, `/^changelog$/i`, `/^dev:/i`, `/^[Hh]ousekeeping/i`, `/^planning/i`, `/[Rr]efactoring/i`, `/tests/i`
   * Default: true
   * Own / additional RegExps via [filterCommits](#filtercommits)
 
