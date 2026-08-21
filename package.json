@@ -1,7 +1,6 @@
 {
   "name": "commits-to-changelog",
   "commits-to-changelog": {
-    "filterCommits": [ "trying" ],
     "linesToReadme": "5"
   },
   "description": "Create an unopionated CHANGELOG.md from Git commit history",
@@ -9,7 +8,7 @@
     "name": "hh lohmann",
     "email": "hh.lohmann@gmail.com"
   },
-  "version": "1.5.1",
+  "version": "1.6.0",
   "keywords": [
     "changelog",
     "log",
