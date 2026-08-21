@@ -546,15 +546,12 @@ function evalNewestCommits(formattedCommits) {
       if(!pkg.version) return rej('The package.json for the current project does not contain a version key');
       let header=_settings.headerDefault;
       out+=EOL+'## ';
-      const latestTag=spawnSync('git',['describe','--tags','--abbrev=0'],{encoding:'utf8'}).stdout.split(EOL)[0];
-      if(latestTag){
-        try{
+      if(_checkNonLabeledSemver(pkg.version)){
+        const latestTag=spawnSync('git',['describe','--tags','--abbrev=0'],{encoding:'utf8'}).stdout.split(EOL)[0];
+        if(latestTag&&_checkNonLabeledSemver(latestTag)){
           if(_compareSemver(pkg.version,latestTag)===2) rej(`Your package version (${pkg.version}) has a SemVer value that falls before your latest tag (${latestTag}).`);
+          if(pkg.version!==latestTag) header=pkg.version;
         }
-        catch(/**@type{any}*/err){
-          rej(`Your package version (${pkg.version}) cannot be processed: ${err.message}`);
-        }
-        if(pkg.version!==latestTag) header=pkg.version;
       }
       out+=`${header} (${getToday()})`+EOL+EOL;
     }
