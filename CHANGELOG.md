@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.6.1 (2026-08-21)
+
+- [Filter commits: optional default filtering case insensitive](https://github.com/hh-lohmann/commits-to-changelog/commit/44acc69)
+
 ## 1.6.0 (2026-08-21)
 
 - [Typo](https://github.com/hh-lohmann/commits-to-changelog/commit/39a7a81)

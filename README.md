@@ -25,11 +25,11 @@ Create an unopionated CHANGELOG.md from Git commit history (see [Details](#detai
 
 *Last 5 changes - see [CHANGELOG file](CHANGELOG.md) for full list and details*
 
+  * (1.6.1) Filter commits: optional default filtering case insensitive
   * (1.6.0) Typo
   * (1.6.0) Update README
   * (1.6.0) Feature: Allow to have no package.json at all
   * (1.6.0) Feature: Allow non-semver tags
-  * (1.6.0) Feature: Allow to have no package.json version = use package.json version only if given
 
 
 ## Synopsis
