@@ -227,6 +227,7 @@ const _getMarkdownBeforeAfterSection=async function(mdFile,headertext,startPos=0
   }
   if(myResult.found){
     const posSectionEnd=await _getPosMarkdownSectionEnd(mdFile,bytePos);
+    if(posSectionEnd<1) return myResult;
     for await (const line of (await open(mdFile)).readLines({encoding:'utf8',start:posSectionEnd})) {
       myResult.after+=line+EOL;
       bytePos+=line.length+EOL.length;
