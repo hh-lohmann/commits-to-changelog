@@ -480,7 +480,8 @@ const _filterOutCommit=function(subject){
 async function _linesToReadme(formattedCommits) {
   if(!_settings.linesToReadme) return;
   let linesToCheck=parseInt(_settings.linesToReadme);
-  if(isNaN(linesToCheck)) throw Error(progName+': _linesToReadme: Setting "linesToReadme" must be a number');
+  if(`${parseInt(linesToCheck.toString())}`!==`${_settings.linesToReadme}`) linesToCheck=-1;
+  if(isNaN(linesToCheck)||linesToCheck<0) throw Error(progName+': _linesToReadme: Setting "linesToReadme" must be a positive integer or a string containing (only) a positive integer');
   if(linesToCheck<1) return;
   if(!existsSync('README.md')) throw Error(progName+': _linesToReadme: No "README.md" given');
   const markdownBeforeAfter=await _getMarkdownBeforeAfterSection('README.md',/Changelog/i);
