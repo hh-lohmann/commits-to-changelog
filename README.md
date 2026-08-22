@@ -235,6 +235,8 @@ will appear in CHANGELOG.md as
 - [Feature: ...this...](https://.../b6f8f5c)
 ```
 
+Git tags may be [lightweight or annotated](#git-lightweight-vs-annotated-tags), i.e. the type of a tag has no influence on the resulting CHANGELOG.md.
+
 Besides the existence and characteristics of Git tags, a possible package.json and Git remote defintions the actually resulting CHANGELOG.md can be shaped by [Settings](#settings).
 
 
@@ -267,6 +269,9 @@ The (initial) code here is forked from [git-to-changelog](#git-to-changelog), an
 
 ### Git: diff
   * <https://git-scm.com/docs/git-diff>
+
+### Git: lightweight vs. annotated tags
+  * <https://git-scm.com/book/en/v2/Git-Basics-Tagging#_creating_tags>
 
 ### Git: Working with Remotes: Showing Your Remotes
   * <https://git-scm.com/book/ms/v2/Git-Basics-Working-with-Remotes#_showing_your_remotes>
