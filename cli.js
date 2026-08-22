@@ -495,7 +495,7 @@ async function _linesToReadme(formattedCommits) {
   let versionStamp='';
   for(let i=0;i<linesToCheck&&i<formattedCommits.length;i++){
     if(formattedCommits[i].tag) tag=formattedCommits[i].tag;
-    versionStamp=tag?tag:formattedCommits[i].date+' '+formattedCommits[i].hash;
+    versionStamp=tag?tag:formattedCommits[i].date;
     if(_filterOutCommit(formattedCommits[i].subject)){
       linesToCheck++;
       continue;
