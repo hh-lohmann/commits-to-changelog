@@ -2,16 +2,9 @@
 
 import { assert,suite,test } from 'node-test-bootstrap';
 import {writeFileSync} from 'node:fs';
-import {open } from 'node:fs/promises';
 import * as _lib from './_lib.js';
 import {testOnlyExports} from '../cli.js';
 
-const _getFirstHeader=async function(){
-  for await (const line of (await open('CHANGELOG.md')).readLines({encoding:'utf8'})) {
-    if(/^## /.test(line)) return line;
-  }
-  return '';
-}
 const headerDefault=testOnlyExports()?._settings.headerDefault;
 
 suite('Feature: Compare pkg.version and latestTag only for possible headerDefault change only if both pass _checkNonLabeledSemver',()=>{
@@ -25,7 +18,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible headerDefaul
     _lib.gitMockCommit();
     _lib.runPkgCli();
     assert(
-      await _getFirstHeader()===`## 2.0.0 (${new Date().toISOString().slice(0,10)})`,
+      await _lib.getFirstHeader()===`## 2.0.0 (${new Date().toISOString().slice(0,10)})`,
       'see '+tstdir
     );
     _lib.rmDir(tstdir);
@@ -40,7 +33,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible headerDefaul
     _lib.gitMockCommit();
     _lib.runPkgCli();
     assert(
-      await _getFirstHeader()===`## ${headerDefault} (${new Date().toISOString().slice(0,10)})`,
+      await _lib.getFirstHeader()===`## ${headerDefault} (${new Date().toISOString().slice(0,10)})`,
       'see '+tstdir
     )
     _lib.rmDir(tstdir);
@@ -55,7 +48,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible headerDefaul
     _lib.gitMockCommit();
     _lib.runPkgCli();
     assert(
-      await _getFirstHeader()===`## ${headerDefault} (${new Date().toISOString().slice(0,10)})`,
+      await _lib.getFirstHeader()===`## ${headerDefault} (${new Date().toISOString().slice(0,10)})`,
       'see '+tstdir
     )
     _lib.rmDir(tstdir);

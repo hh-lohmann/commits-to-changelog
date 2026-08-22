@@ -443,8 +443,7 @@ function formatCommits(commits) {
         mergeCommitStart = false,
         mergeCommitEnd = false;
     let tag=null;
-    refNames.split(', ').forEach(value=>{if(value.startsWith('tag: ')) tag=value.split('tag: ')[1]})
-
+    tag=refNames.split(', ').filter(value=>value.startsWith('tag: ')).map(value=>value.split('tag: ')[1]).sort().join(' / ');
     if (parents && parents.includes(" ")) {
       mergeCommitStart = true;
       prevParent = parents.slice(0, parents.indexOf(" "));

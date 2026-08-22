@@ -8,6 +8,7 @@ export {existsSync} from 'node:fs';
 export {chdir as cd} from 'node:process';
 import {spawnSync} from 'node:child_process';
 import {existsSync,mkdirSync,rmSync,statSync,writeFileSync} from 'node:fs';
+import {open } from 'node:fs/promises';
 import {EOL,tmpdir} from 'node:os';
 import {dirname,sep as pathSep} from 'node:path';
 import {cwd,execPath as runtimeExec} from 'node:process';
@@ -137,6 +138,12 @@ export const commonSpawnReturnContains=function(search,commonSpawnReturn,stream=
   return false;
 }
 
+export const getFirstHeader=async function(){
+  for await (const line of (await open('CHANGELOG.md')).readLines({encoding:'utf8'})) {
+    if(/^## /.test(line)) return line;
+  }
+  return '';
+}
 
 /** Init Git with branch "mock" in current directory to use with mocks
  *  - Does nothing if Git with branch "mock" already exists
