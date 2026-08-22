@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0 (2026-08-22)
+
+- [README: Clarify: Git remote must be defined for current branch to be used](https://github.com/hh-lohmann/commits-to-changelog/commit/be7b6ec)
+- [Feature: Support multiple tags on the same commit](https://github.com/hh-lohmann/commits-to-changelog/commit/5677df6)
+
 ## 2.0.1 (2026-08-22)
 
 - [README: Clarify: Git remote must be defined for current branch to be used](https://github.com/hh-lohmann/commits-to-changelog/commit/d639f01)
