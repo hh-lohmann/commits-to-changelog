@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0 (2026-08-22)
+
+- [Feature: Require tag (depending on setting requireTag): Reject creating a Changelog if commits without associated Git tag exist](https://github.com/hh-lohmann/commits-to-changelog/commit/4bba2cc)
+
 ## 1.6.2 (2026-08-22)
 
 - [Feature: Write newest changelog entries also to README.md: add: Write HTML comment informing that content was inserted by commits-to-changelog](https://github.com/hh-lohmann/commits-to-changelog/commit/b6f8f5c)
