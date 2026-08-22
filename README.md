@@ -57,7 +57,7 @@ Default settings can be overwritten by key-value pairs in an object as value for
   "commits-to-changelog": {
     "headerDefault": "Latest",
     "headerMerged": "Implement",
-    "linesToReadme": "5"
+    "linesToReadme": 5
   },
   "dependencies": {
     "...": "..."
@@ -91,8 +91,9 @@ String to use as header for listing [Merged Branches](#merged-branches) with a c
 Write defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md
   * Existing section content is overwritten
   * Short entry form with link to full CHANGELOG.md
-  * If "0" or undefined: Do not write to README.md
+  * If "0", false or undefined: Do not touch README.md (and a possibly existing section Changelog)
   * Default: "0"
+  * Note: The value should be a positive integer, but for convenience also strings containing (only) a positive integer are accepted
   * Throws errors if greater "0" but no README.md or no section "Changelog" (case insensitive) was found in README.md
 
 
