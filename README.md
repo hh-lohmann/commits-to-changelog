@@ -219,7 +219,7 @@ where `# Changelog` is the **title**, a Markdown [atx heading](#commonmark-spec-
 
 so that the applicable Git tag / package.json version or the headerDefault becomes the `{groupheader}` that together with the date of the Git tag or else the current date constitutes a Markdown heading of level 2 under which **associated commits** are listed as
 
-  * if a [Git remote](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
+  * if a [Git remote *for the current branch*](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
   * if no Git remote is given: the subject of the commit only
 
 Besides the existence and characteristics of Git tags, a possible package.json and Git remote defintions the actually resulting CHANGELOG.md can be shaped by [Settings](#settings).
