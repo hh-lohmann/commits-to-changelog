@@ -18,7 +18,7 @@ suite('Feature: Write newest changelog entries also to README.md',()=>{
       const tstdir=_lib.randomTmpDir();
       _lib.cd(tstdir);
       _lib.gitMockCommit();
-      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":0.1}}');
+      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":0.1,"requireTag":false}}');
       assert(
         _lib.commonSpawnErrContains('must be a positive integer',_lib.runPkgCli()),
         'see '+tstdir
@@ -30,7 +30,7 @@ suite('Feature: Write newest changelog entries also to README.md',()=>{
       const tstdir=_lib.randomTmpDir();
       _lib.cd(tstdir);
       _lib.gitMockCommit();
-      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":-1}}');
+      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":-1,"requireTag":false}}');
       assert(
         _lib.commonSpawnErrContains('must be a positive integer',_lib.runPkgCli()),
         'see '+tstdir
@@ -42,7 +42,7 @@ suite('Feature: Write newest changelog entries also to README.md',()=>{
       const tstdir=_lib.randomTmpDir();
       _lib.cd(tstdir);
       _lib.gitMockCommit();
-      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":"pure string"}}');
+      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":"pure string","requireTag":false}}');
       assert(
         _lib.commonSpawnErrContains('must be a positive integer',_lib.runPkgCli()),
         'see '+tstdir
@@ -54,7 +54,7 @@ suite('Feature: Write newest changelog entries also to README.md',()=>{
       const tstdir=_lib.randomTmpDir();
       _lib.cd(tstdir);
       _lib.gitMockCommit();
-      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":"1"}}');
+      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":"1","requireTag":false}}');
       assert(
         _lib.runPkgCli().status===0,
         'see '+tstdir
@@ -66,7 +66,7 @@ suite('Feature: Write newest changelog entries also to README.md',()=>{
       const tstdir=_lib.randomTmpDir();
       _lib.cd(tstdir);
       _lib.gitMockCommit();
-      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":1}}');
+      writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":1,"requireTag":false}}');
       assert(
         _lib.runPkgCli().status===0,
         'see '+tstdir
@@ -80,7 +80,7 @@ suite('Feature: Write newest changelog entries also to README.md',()=>{
     _lib.cd(tstdir);
     _lib.gitMockCommit();
     writeFileSync('README.md','# Mock README\n\n## Changelog\n\n');
-    writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":5}}');
+    writeFileSync('package.json','{"commits-to-changelog":{"linesToReadme":5,"requireTag":false}}');
     _lib.runPkgCli();
     const readmeContent=testOnlyExports()?.fileToArr('README.md');
     assert(

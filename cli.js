@@ -27,7 +27,8 @@ const _settings={
   filterDefaults: true,
   headerDefault: 'Current',
   headerMerged: 'Include (results of) separate branch',
-  linesToReadme: 0
+  linesToReadme: 0,
+  requireTag: true
 }
 
 export const testOnlyExports=function(){
@@ -539,6 +540,7 @@ function setHeader(formattedCommits) {
 function evalNewestCommits(formattedCommits) {
   return new Promise((res, rej) => {
     if (!formattedCommits[0].tag) {
+      if(_settings.requireTag) throw Error(progName+': Untagged commit found (use setting "requireTag:false" to allow untagged commits)');
       let header=_settings.headerDefault;
       out+=EOL+'## ';
       if(pkg&&pkg.version&&_checkNonLabeledSemver(pkg.version)){

@@ -8,7 +8,7 @@ import {writeFileSync} from 'node:fs';
 test( 'Exit: Error writing CHANGELOG.md file',()=> {
   const tstdir=_lib.randomTmpDir();
   _lib.cd(tstdir);
-  _lib.mkPackageJson([['version','1.0.0']]);
+  writeFileSync('package.json','{"commits-to-changelog":{"requireTag":false}}');
   _lib.gitMockRemote('htts://www.example.com');
   _lib.gitMockCommit();
   writeFileSync('CHANGELOG.md', 'mock', {mode:'444'});

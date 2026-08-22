@@ -4,6 +4,7 @@
 
 Create an unopionated CHANGELOG.md from Git commit history (see [Details](#details))
 
+* Rejects by default creating a Changelog if commits without associated Git tag exist, untagged commits can be allowed via [setting](#settings) [requireTag](#requiretag) 
 * Creates CHANGELOG.md on each run from scratch, i.e. an existing on will be overwritten
 * Optionally writes defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md (see [linesToReadme](#linestoreadme) under [Settings](#settings))
 * Commits that are rather not relevant for users, e.g. "bump version" / changelog" / addressing "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be [defined](#filtercommits) as as [setting](#settings)
@@ -96,6 +97,12 @@ Write defined number of lines from the start of CHANGELOG.md also to an existing
   * Default: "0"
   * Note: The value should be a positive integer, but for convenience also strings containing (only) a positive integer are accepted
   * Throws errors if greater "0" but no README.md or no section "Changelog" (case insensitive) was found in README.md
+
+#### requireTag
+Reject creating a Changelog if commits without associated Git tag exist
+  * Boolean, default: true
+  * Meant to improve workflows where a tag marks a release version and untagged commits would be missing when deploying via release version tag
+
 
 
 ## Returns
@@ -200,19 +207,20 @@ The resulting CHANGELOG.md has the simple structure
 - [{commit-subject}]({commit-link})
 
 (...)
-
 ```
 
 where `# Changelog` is the **title**, a Markdown [atx heading](#commonmark-spec-atx-headings) (i.e. using "#") of level 1 with the text "Changelog", followed by an empty line, and lists of commits that are **grouped** by
 
-  1. if given: a Git tag they are associated with
-  2. if no Git tag associated: an existing package.json version if this is [a non-labeled SemVer](#non-labeled-semver) and is newer than an existing previous tag that is also a non-labeled SemVer
-  3. if none of the above applies: the [headerDefault](#headerdefault) (see [Settings](#settings))
+  * if setting [requireTag](#requiretag) is `true` (default): the Git tag they are associated with
+  * if requireTag is `false`:
+    * if given: a Git tag they are associated with
+    * if no Git tag associated: an existing package.json version if this is [a non-labeled SemVer](#non-labeled-semver) and is newer than an existing previous tag that is also a non-labeled SemVer
+    * if none of the above applies: the [headerDefault](#headerdefault) (see [Settings](#settings))
 
 so that the applicable Git tag / package.json version or the headerDefault becomes the `{groupheader}` that together with the date of the Git tag or else the current date constitutes a Markdown heading of level 2 under which **associated commits** are listed as
 
-  1. if a [Git remote](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
-  1. if no Git remote is given: the subject of the commit only
+  * if a [Git remote](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
+  * if no Git remote is given: the subject of the commit only
 
 Besides the existence and characteristics of Git tags, a possible package.json and Git remote defintions the actually resulting CHANGELOG.md can be shaped by [Settings](#settings).
 

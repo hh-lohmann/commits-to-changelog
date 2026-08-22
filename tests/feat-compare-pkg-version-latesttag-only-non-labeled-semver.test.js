@@ -1,6 +1,7 @@
 // @ts-check
 
 import { assert,suite,test } from 'node-test-bootstrap';
+import {writeFileSync} from 'node:fs';
 import {open } from 'node:fs/promises';
 import * as _lib from './_lib.js';
 import {testOnlyExports} from '../cli.js';
@@ -18,7 +19,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible headerDefaul
   test( 'pkg.version and latestTag are both non-labeled semver, pkg.version is newer => header=pkg.version',async()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
-    _lib.mkPackageJson([['version','2.0.0']]);
+    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"requireTag":false}}');
     _lib.gitMockCommit();
     _lib.gitMockTag({tagname:'1.0.0'});
     _lib.gitMockCommit();
@@ -33,7 +34,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible headerDefaul
   test( `pkg.version is not a non-labeled semver => _settings.headerDefault (current: "${headerDefault}")`,async()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
-    _lib.mkPackageJson([['version','2.0.0-dev']]);
+    writeFileSync('package.json','{"version":"2.0.0-dev","commits-to-changelog":{"requireTag":false}}');
     _lib.gitMockCommit();
     _lib.gitMockTag({tagname:'1.0.0'});
     _lib.gitMockCommit();
@@ -48,7 +49,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible headerDefaul
   test( `lastTag is not a non-labeled semver =>  _settings.headerDefault (current: "${headerDefault}")`,async()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
-    _lib.mkPackageJson([['version','2.0.0']]);
+    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"requireTag":false}}');
     _lib.gitMockCommit();
     _lib.gitMockTag({tagname:'1.0.0-dev'});
     _lib.gitMockCommit();

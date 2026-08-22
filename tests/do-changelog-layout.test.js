@@ -2,7 +2,7 @@
 
 import { assert,suite,test } from 'node-test-bootstrap';
 import {after,before} from 'node:test';
-import {rmSync} from 'node:fs';
+import {rmSync,writeFileSync} from 'node:fs';
 import * as _lib from './_lib.js';
 import {testOnlyExports} from '../cli.js';
 
@@ -34,7 +34,7 @@ suite('Do: Changelog file layout',()=>{
   before(()=>{
     try{
       _lib.cd(tstdir);
-      _lib.mkPackageJson([['version','1.0.0']]);
+      writeFileSync('package.json','{"version":"1.0.0","commits-to-changelog":{"requireTag":false}}');
       _lib.gitMockCommit();
       _lib.commonSpawn('git checkout -b sub');
       _lib.gitMockCommit({branch:'sub'});
@@ -114,7 +114,7 @@ suite('Do: Changelog file layout',()=>{
         const versionTitle="## "+myVersion;
         let i=headerLines.length+1;
         rmSync('package.json');
-        _lib.mkPackageJson([['version',myVersion]]);
+        writeFileSync('package.json','{"version":"'+myVersion+'","commits-to-changelog":{"requireTag":false}}');
         _lib.runPkgCli();
         const myChangelogLines=_fileToArr('CHANGELOG.md','last');
         if(myChangelogLines[i].slice(0,versionTitle.length)!==versionTitle) return false;

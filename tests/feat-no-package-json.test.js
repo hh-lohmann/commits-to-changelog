@@ -7,6 +7,7 @@ test('Feature: Allow to have no package.json at all',()=>{
   const tstdir=_lib.randomTmpDir();
   _lib.cd(tstdir);
   _lib.gitMockCommit();
+  _lib.gitMockTag();
   ;
   assert(
     _lib.runPkgCli().status===0,
