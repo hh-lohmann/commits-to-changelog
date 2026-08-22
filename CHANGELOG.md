@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 (2026-08-22)
+
+- [README: Clarify: Git remote must be defined for current branch to be used](https://github.com/hh-lohmann/commits-to-changelog/commit/d639f01)
+
 ## 2.0.0 (2026-08-22)
 
 - [Feature: Require tag (depending on setting requireTag): Reject creating a Changelog if commits without associated Git tag exist](https://github.com/hh-lohmann/commits-to-changelog/commit/4bba2cc)
