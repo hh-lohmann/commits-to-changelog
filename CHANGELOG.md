@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.2 (2026-08-22)
+
+- [Feature: Write newest changelog entries also to README.md: add: Write HTML comment informing that content was inserted by commits-to-changelog](https://github.com/hh-lohmann/commits-to-changelog/commit/b6f8f5c)
+- [Feature: Write newest changelog entries also to README.md: display if no tag asscociated: only date](https://github.com/hh-lohmann/commits-to-changelog/commit/c17d281)
+- [fix: internal handling of EOF while searching for a section "Changelog" in README.md](https://github.com/hh-lohmann/commits-to-changelog/commit/4ec3fe0)
+- [Feature: Write newest changelog entries also to README.md: fix: reject string containing more than a positive integer as value for "linesToReadme"](https://github.com/hh-lohmann/commits-to-changelog/commit/6d596e9)
+- [Feature: Write newest changelog entries also to README.md: clarify: linesToReadme = 0 /  false / undefined leaves an existing section "Changelog" untouched](https://github.com/hh-lohmann/commits-to-changelog/commit/9ebf79a)
+
 ## 1.6.1 (2026-08-21)
 
 - [Filter commits: optional default filtering case insensitive](https://github.com/hh-lohmann/commits-to-changelog/commit/44acc69)
