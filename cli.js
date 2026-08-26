@@ -39,7 +39,8 @@ export const testOnlyExports=function(){
       brandMsg:brandMsg,
       fileToArr:_fileToArr,
       progName:progName,
-      _settings:_settings
+      _settings:_settings,
+      _stringToRegExp:_stringToRegExp
     }
   )
 }
@@ -105,7 +106,7 @@ const _checkIsMarkdownSectionEnd=function(textsample){
     }
     if(/^ {0,3}#+ \w/.test(textsample[i])) return possiblyMatchingIndex;
     // slightly overgenerating RegExp for HTML tags
-    // (note that the internet is full of undergenerating ones) 
+    // (note that the internet is full of undergenerating ones)
     if(/^ {0,3}<[a-z]+[ \S]*>/.test(textsample[i])) return possiblyMatchingIndex;
   }
   return -2;
@@ -132,7 +133,7 @@ const _checkNonLabeledSemver=function(version){
  *    - for RegExp flags like `/i` for "ignore case" are effective
  * @example _checkMarkdownHasSection('README.md',/Changelog/i)
  * @example _checkMarkdownHasSection('README.md','Changelog')
- * @param mdFile - Markdown file 
+ * @param mdFile - Markdown file
  * @param headertext - see above
  * @returns Promise: boolean
  * @type {(mdFile:string,headertext:string|RegExp)=>Promise<boolean>}
@@ -325,10 +326,15 @@ const _getPackageJson=function(){
 
 /** Handle string containing RegExp
  *  - Especially for JSON that has no type "RegExp"
- *  - Makes both e.g. "/^exp$/" and "^exp$" to /^exp$/ (i.e. interprets
- *    unquoted "/" at start and end as RegExp delimiters)
+ *  - Makes both e.g. "/^exp$/" and "^exp$" to /^exp$/ (but not e.g.
+ *    "/^exp$" or "^exp$/", i.e. interprets *pairs* of unquoted "/" at
+ *    start and end as RegExp delimiters)
+ *  - Recognizes RegExp flags d / g / i / m / s / u / v / y
+ *    - e.g. "/exp/i" or "exp/i"
  * @example _stringToRegExp("/^exp$/")
  * @example _stringToRegExp("^exp$")
+ * @example _stringToRegExp("/^exp$/i")
+ * @example _stringToRegExp("^exp$/i")
  * @param string - The string to return as RegExp
  * @returns Resulting RegExp
  * @type {(string:string)=>RegExp}
@@ -336,8 +342,37 @@ const _getPackageJson=function(){
 const _stringToRegExp=function(string){
   if(!string) throw Error(progName+': _stringToRegExp: No parameter passed');
   if(typeof string!=='string') throw Error(progName+': _stringToRegExp: Parameter "string" must be a string or a RegExp');
-  if(/^\//.test(string)) string=string.slice(1);
-  if(/[^\\]\/$/.test(string)) string=string.slice(0,-1);
+  const chkIfFlags=function(string=''){
+    const knownFlags=['d','g','i','m','s','u','v','y'];
+    knownFlags.forEach(value=>{
+      string=string.replace(value,'');
+    });
+    if(string==='') return true;
+    return false;
+  }
+  const mask={
+    masks:
+      [
+        ['\\/','--ßläsh--']
+      ],
+    mask(string='',from=0,to=1){
+      this.masks.forEach(value=>{
+        string=string.replaceAll(value[from],value[to]);
+      })
+      return string;
+    },
+    off(string=''){return this.mask(string,1,0)},
+    on(string=''){return this.mask(string,0,1)}
+  };
+  const myParts=mask.on(string).split('/');
+  if(myParts.length===1) return new RegExp(string);
+  if(myParts[0]===''){
+    if(myParts[myParts.length-1]==='') return new RegExp(myParts.slice(1,-1).join('/'));
+    if(chkIfFlags(myParts[myParts.length-1])) return new RegExp(myParts.slice(1,-1).join('/'),myParts[myParts.length-1]);
+    return new RegExp(string);
+  }
+  if(myParts[myParts.length-1]==='') return new RegExp(string);
+  if(chkIfFlags(myParts[myParts.length-1])) return new RegExp(myParts.slice(0,-1).join('/'),myParts[myParts.length-1]);
   return new RegExp(string);
 }
 
