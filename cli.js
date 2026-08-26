@@ -32,16 +32,17 @@ const _settings={
 }
 
 export const testOnlyExports=function(){
-  const localTestsFolder=import.meta.dirname+'/tests/';
-  if(process.argv[1].slice(0,localTestsFolder.length)===localTestsFolder){
-    return (
-      {
-        brandMsg:brandMsg,
-        fileToArr:_fileToArr,
-        _settings:_settings
-      }
-    )
-  }
+  const callPathParts=process.argv[1].split(sep);
+  if(callPathParts.slice(-2,-1)[0]!=='tests') return;
+  if(!callPathParts.includes(progName)) return;
+  return (
+    {
+      brandMsg:brandMsg,
+      fileToArr:_fileToArr,
+      progName:progName,
+      _settings:_settings
+    }
+  )
 }
 
 /** Brand a message string by prefixing "<brand>: "
