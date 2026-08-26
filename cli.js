@@ -448,7 +448,7 @@ function formatCommits(commits) {
     if (parents && parents.includes(" ")) {
       mergeCommitStart = true;
       prevParent = parents.slice(0, parents.indexOf(" "));
-      subject = subject.replace(/^Merge branch ('.+?').*/, _settings.headerMerged+'$1');
+      subject = subject.replace(/^Merge branch ('.+?').*/, _settings.headerMerged+' $1');
     } else if (hash == prevParent) {
       mergeCommitEnd = true;
     }
