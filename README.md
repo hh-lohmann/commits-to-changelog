@@ -124,7 +124,7 @@ See the section [Changelog](#changelog) in this file (cf. details for optional s
 
 ### Merged Branches
 
-Branches that were merged as an explicit commit (i.e. no fast-forward) are listed as indented blocks with the message of the merge commit as a title line, e.g.
+Branches that were merged as an explicit commit (i.e. no fast-forward, e.g. explicitly by `git merge --no-ff`) are listed as indented blocks with the message of the merge commit as a title line, e.g.
 
 ```sh
 * dddb03a (HEAD -> master, origin/master) fix/unclear-error
@@ -142,14 +142,14 @@ as
 - Update token hash to include encoded user name
 ```
 
-If the merge's commit message has the form `Merge branch '<branch name>'` it will be replaced by `Include (results of) separate branch '<branch-name>'`, e.g.
+If the merge's commit message has the form `Merge branch '<branch name>'` it will be replaced by the value of the [headerMerged](#headermerged) [setting](#settings), e.g.
 
 ```sh
 * dddb03a (HEAD -> master, origin/master) Merge branch 'fix/unclear-error'
 ...
 ```
 
-as
+with default value `Include (results of) separate branch '<branch-name>'` as
 
 ```markdown
 - Include (results of) separate branch 'fix/unclear-error'
