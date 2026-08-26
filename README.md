@@ -9,7 +9,6 @@ Create an unopionated CHANGELOG.md from Git commit history (see [Details](#detai
 * Optionally writes defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md (see [linesToReadme](#linestoreadme) under [Settings](#settings))
 * Commits that are rather not relevant for users, e.g. "bump version" / changelog" / addressing "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be [defined](#filtercommits) as as [setting](#settings)
   * I.e. no pressure to spoof commits or history to get a nice CHANGELOG
-* Special handling of [Merged Branches](#merged-branches)
 * Does explicitly not do any magic based on things [Conventional Commits](#conventional-commits) to keep it compatible with less organized repos, but of course you should use commit conventions.
 
 *[hh lohmann &lt;hh.lohmann@gmail.com&gt;](mailto:hh.lohmann@gmail.com?subject=commits-to-changelog)*
@@ -58,7 +57,6 @@ Default settings can be overwritten by key-value pairs in an object as value for
   "version": "...",
   "commits-to-changelog": {
     "headerDefault": "Latest",
-    "headerMerged": "Implement",
     "linesToReadme": 5
   },
   "dependencies": {
@@ -84,10 +82,6 @@ Boolean: Filter out commit types that are rather not relevant for users by match
 #### headerDefault
 String to use as header for listing commits that do not belong to a defined Git tag
   * Default: "Current"
-
-#### headerMerged
-String to use as header for listing [Merged Branches](#merged-branches) with a commit message of the form `Merge branch '<branch name>'`
-  * Default: "Include (results of) separate branch"
 
 #### linesToReadme
 Write defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md
@@ -120,42 +114,6 @@ See the [CHANGELOG.md](https://github.com/hh-lohmann/commits-to-changelog/blob/r
 ### Sample for optionally writing to a section "Changelog" in README.md
 
 See the section [Changelog](#changelog) in this file (cf. details for optional setting [linesToReadme](#linestoreadme) under [Settings](#settings))
-
-
-### Merged Branches
-
-Branches that were merged as an explicit commit (i.e. no fast-forward, e.g. explicitly by `git merge --no-ff`) are listed as indented blocks with the message of the merge commit as a title line, e.g.
-
-```sh
-* dddb03a (HEAD -> master, origin/master) fix/unclear-error
-|\
-| * f6f8cd1 Update error message
-|/
-* 4bd8518 Update token hash to include encoded user name
-```
-
-as
-
-```markdown
-- fix/unclear-error
-  - Update error message
-- Update token hash to include encoded user name
-```
-
-If the merge's commit message has the form `Merge branch '<branch name>'` it will be replaced by the value of the [headerMerged](#headermerged) [setting](#settings), e.g.
-
-```sh
-* dddb03a (HEAD -> master, origin/master) Merge branch 'fix/unclear-error'
-...
-```
-
-with default value `Include (results of) separate branch '<branch-name>'` as
-
-```markdown
-- Include (results of) separate branch 'fix/unclear-error'
-...
-```
-
 
 
 ## Dependencies
@@ -240,6 +198,38 @@ will appear in CHANGELOG.md as
 Git tags may be [lightweight or annotated](#git-lightweight-vs-annotated-tags), i.e. the type of a tag has no influence on the resulting CHANGELOG.md.
 
 Besides the existence and characteristics of Git tags, a possible package.json and Git remote defintions the actually resulting CHANGELOG.md can be shaped by [Settings](#settings).
+
+
+> Deprecations
+>
+> * Special Handling for Explicitly Commited Merged Branches / no Fast Forward
+>   * Up to including version 2.1.0, branches that were merged as an explicit commit (i.e. no fast-forward, e.g. explicitly by `git merge --no-ff`) were listed as indented blocks with the message of the merge commit as a title line, e.g.
+>     ```sh
+>     * dddb03a (HEAD ->     master, origin/master) fix/unclear-error
+>     |\
+>     | * f6f8cd1 Update error message
+>     |/
+>     * 4bd8518 Update token hash to include encoded user name
+>     ```
+>     as
+>     ```markdown
+>     - fix/unclear-error
+>       - Update error message
+>     - Update token hash to include encoded user name
+>     ```
+>     If the merge's commit message has the form `Merge branch '<branch name>'` it will be replaced by the value of the [setting](#settings) headerMerged (see below), e.g. with value "Include (results of) separate branch" the merge commit
+>     ```sh
+>     * dddb03a (HEAD -> master, origin/master) Merge branch 'fix/unclear-error'
+>     ...
+>     ```
+>     would become
+>     ```markdown
+>     - Include (results of) separate branch 'fix/unclear-error'
+>     ...
+>     ```
+>     This feature is deprecated in version 2.2.0 and higher since tags "inside" a merged branch will act as "normal" group markers on the parent's level (i.e. breaking the aimed "subgrouping" of the merged commits). 
+>     * For backwards compatibility this feature can be re-enabled by setting `headerMerged` with a string value to be used as title line. Per default `headerMerged` is not set and merged commits will be displayed as normal commits.
+>     * It is strongly advised not to settle on this feature but instead to use (specially tailored) Git tags to group commits together
 
 
 ## Source Code

@@ -26,7 +26,6 @@ const _settings={
   filterCommits:[],
   filterDefaults: true,
   headerDefault: 'Current',
-  headerMerged: 'Include (results of) separate branch',
   linesToReadme: 0,
   requireTag: true
 }
@@ -445,7 +444,7 @@ function formatCommits(commits) {
         mergeCommitEnd = false;
     let tag=null;
     tag=refNames.split(', ').filter(value=>value.startsWith('tag: ')).map(value=>value.split('tag: ')[1]).sort().join(' / ');
-    if (parents && parents.includes(" ")) {
+    if(_settings.headerMerged&&parents.split(' ').length>1){
       mergeCommitStart = true;
       prevParent = parents.slice(0, parents.indexOf(" "));
       subject = subject.replace(/^Merge branch ('.+?').*/, _settings.headerMerged+' $1');

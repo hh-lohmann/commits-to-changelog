@@ -157,19 +157,6 @@ suite('Do: Changelog file layout',()=>{
     );
   });
 
-  test( 'Indented block for merged branch',()=> {
-    assert(
-      (()=>{
-        if(changelogLines.pop()?.slice(0,2)!=='- ') return false;
-        if(changelogLines.pop()?.slice(0,4)!=='  - ') return false;
-        if(changelogLines.pop()?.slice(0,4)!=='  - ') return false;
-        if(changelogLines.pop()?.slice(0,2)!=='- ') return false;
-        return true;
-      })(),
-      'unexpected structure for merged commits in CHANGELOG.md, see '+tstdir
-    );
-  });
-
   after(()=> {
     _lib.rmDir(tstdir);
   });
