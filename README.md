@@ -222,6 +222,8 @@ so that the applicable Git tag / package.json version or the headerDefault becom
   * if a [Git remote *for the current branch*](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
   * if no Git remote is given: the subject of the commit only
 
+Git tags do not need to have any special structure or orderings, they could be natural numbers as well as SemVers, ISO dates, [CalVer](#calver), arbitrary names or any mixture like that used by [DokuWiki](#dokuwiki-changelog), they are generally just "tags" in the most verbatim sense, giving the information you may regard as helpful to track changes - the order in the CHANGELOG.md always depends on that of the listed Git commits, not on any tagging scheme. You may choose a scheme that allows to integrate a CHANGELOG.md creation into an overall workflow like setting first a non-labeled SemVer version in package.json and derive release tags from this (see above).
+
 If *multiple Git tags* exist on the same commit (for whatever reason), then the `{groupheader}` will be a sorted list of all tags separated by `/`, e.g. commits like
 ```console
 b6f8f5c (tag: fix-that, tag: feat-this) Fix: ...this...
@@ -257,11 +259,19 @@ The (initial) code here is forked from [git-to-changelog](#git-to-changelog), an
 
 ## References
 
+### CalVer
+  * Calendar Versioning based on release calendar instead of arbitrary numbers
+  * <https://calver.org/>
+
 ### CommonMark Spec: ATX headings
   * <https://spec.commonmark.org/0.31.2/#atx-headings>
 
 ### Conventional Commits
   * <https://www.conventionalcommits.org>
+
+### DokuWiki Changelog
+  * Example for a special versiong scheme
+  * <https://www.dokuwiki.org/changes>
 
 ### Git commmit subject
   * The first line of a commit message that is separated from the body of the message by an empty line (identical to the whole message if this have empty line)
