@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.3.0 (2026-09-01)
+
+- [Feature: Use commit date as group date if no tag is given (opt with setting to "current date")](https://github.com/hh-lohmann/commits-to-changelog/commit/67ee0b3)
+
 ## 2.2.2 (2026-09-01)
 
 - [README: Clarify: Independent of special commit conventions](https://github.com/hh-lohmann/commits-to-changelog/commit/8393cb6)
