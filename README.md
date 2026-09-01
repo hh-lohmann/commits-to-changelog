@@ -4,7 +4,8 @@
 
 Create an unopionated CHANGELOG.md from Git commit history (see [Details](#details))
 
-* Refuses by default if commits exist that are newer than the newest tag (i.e. imposing release tags), "untagged" commits can be allowed by negating the [setting](#settings) [requireTag](#requiretag)
+* Expects by default Git tags to group commits (i.e. imposing release tags), "untagged" commits can be allowed by negating the [setting](#settings) [requireTag](#requiretag)
+* Additionally / alternatively grouping by date via [setting](#settings) [useDateGroups](#usedategroups)
 * Creates CHANGELOG.md on each run from scratch, i.e. an existing on will be overwritten
 * Optionally writes defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md (see [linesToReadme](#linestoreadme) under [Settings](#settings))
 * Commits that are rather not relevant for users, e.g. "bump version" / changelog" / "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be defined as values for the [setting](#settings) [filterCommits](#filtercommits)
@@ -102,6 +103,22 @@ Reject creating a Changelog if commits without associated Git tag exist
   * Boolean, default: true
   * Meant to improve workflows where a tag marks a release version and untagged commits would be missing when deploying via release version tag
 
+#### useDateGroups
+Use commit date to group commits (additionally to tags)
+  * Not to substitute / replace tags, i.e. not overriding tags / setting [requireTag](#requiretag)
+    * If a possible grouping by date matches a grouping by a tag, then this group will be headed by the tag (as usual followed by the date in parentheses)
+    * Not to confuse with using dates as tags
+  * Group header displayed in italics to distinguish from tags
+    * A tag can span several dates and a date several tags
+  * Possible values (default: "never")
+    * false | "never"
+    * "always"
+    * "after:`isodate`"
+      * Do group only commits before `isodate` by date, `isodate` = e.g. `2022-02-22`
+      * E.g. to pre-structure time spans that are not tagged yet
+    * "before:`isodate`"
+      * cf. "after"
+
 #### useNotes
 Boolean: Display also [Git notes](#git-notes) (if existing)
   * Default: true
@@ -190,7 +207,25 @@ so that the applicable Git tag / package.json version or the headerDefault becom
   * if a [Git remote *for the current branch*](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
   * if no Git remote is given: the subject of the commit only
 
-If your workflow allows commits without tags (see [setting](#settings) [requireTag](#requiretag)) then you can opt with [setting](#settings) [defaultDateToday](#defaultdatetoday) to use the current date for commits without tags instead the newest commit's date .
+If your workflow allows commits without tags (see [setting](#settings) [requireTag](#requiretag)) then you can opt with [setting](#settings) [defaultDateToday](#defaultdatetoday) to use the current date for commits without tags instead the newest commit's date.
+
+With [setting](#settings) [useDateGroups](#usedategroups) you can additionally group by date, distinguished from tag based grouping by groupheader in italics, e.g.
+
+```
+# Changelog
+
+## {groupheader} ({date})
+
+- [{commit-subject}]({commit-link})
+- [{commit-subject}]({commit-link})
+
+## *{date}*
+
+- [{commit-subject}]({commit-link})
+- [{commit-subject}]({commit-link})
+
+(...)
+```
 
 Git tags do not need to have any special structure or orderings, they could be natural numbers as well as SemVers, ISO dates, [CalVer](#calver), arbitrary names or any mixture like that used by [DokuWiki](#dokuwiki-changelog), they are generally just "tags" in the most verbatim sense, giving the information you may regard as helpful to track changes - the order in the CHANGELOG.md always depends on that of the listed Git commits, not on any tagging scheme. You may choose a scheme that allows to integrate a CHANGELOG.md creation into an overall workflow like setting first a non-labeled SemVer version in package.json and derive release tags from this (see above).
 

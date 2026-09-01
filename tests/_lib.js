@@ -6,13 +6,13 @@
 
 export {existsSync} from 'node:fs';
 export {chdir as cd} from 'node:process';
-import {spawnSync} from 'node:child_process';
 import {existsSync,mkdirSync,rmSync,statSync,writeFileSync} from 'node:fs';
 import {open } from 'node:fs/promises';
 import {EOL,tmpdir} from 'node:os';
 import {dirname,sep as pathSep} from 'node:path';
 import {cwd,execPath as runtimeExec} from 'node:process';
-import {testOnlyExports} from '../cli.js';
+import {commonSpawn,isIsoDate,testOnlyExports} from '../cli.js';
+export {commonSpawn};
 
 // @ts-ignore
 const _brandMsg=testOnlyExports().brandMsg;
@@ -23,57 +23,57 @@ export const checkHeader=function(string='',header=headerDefault){
   if(myParts.length!==2||myParts[0]!=='') return false;
   const datepart=myParts[1].match(/\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/);
   if(!datepart) return false;
-  if(!isIsoDateNoTime(datepart[0].slice(1,-1))) return false;
+  if(!isIsoDate(datepart[0].slice(1,-1))) return false;
   return true;
 }
 
-/** Simplify Node's spawnSync call signature / return to its common usage
- *  - i.e. stdio encoding utf8 and passing a usual command line call divided by
- *    spaces into exec / args, returning an object with status / stdout /
- *    stderr of execution where stdout / stderr as arrays of strings instead of
- *    joined lines of strings for easier consumption
- *  - quoting with single or double quotes e.g. for arguments containing spaces
- *    is supported, but quoting quotes goes beyond "common"
- *  - NB: Bun's console.log introduces ANSI codes for CLI display, these are
- *    NOT part of the returned object itself
- * @example commonSpawn('git log --oneline -10')
- * @example commonSpawn('git commit -m "Some changes"')
- * @example commonSpawn("git commit -m 'Some changes'")
- * @param commandline - Progamm call with args as it would be given on command
- *    line
- * @returns - Object with status / stdout / stderr of cli run
- * @type {(commandline:string)=>{status:number|null,stderr:string[],stdout:string[]}}
-*/
-export const commonSpawn=function(commandline){
-  if(!commandline) throw Error(_brandMsg(`commonSpawn: Parameter "commandline" must be set`));
-  if(typeof commandline!=='string') throw Error(_brandMsg(`commonSpawn: Parameter "commandline" must be a string`));
-  // Normalize quotes for args with spaces: best compromise for Node vs. Bun
-  const [exec, ...args]=commandline.replaceAll('"',"'").split(' ');
-  for(let i=0; i<args.length; i++){
-    if(['&&','||','|'].includes(args[i])) throw Error(_brandMsg(`commonSpawn: Operators like "${args[i]}" are not supported - try to combine multiple commonSpawn calls by JavaScript means`));
-  }
-  let argCandidate='';
-  /** @type{string[]} */
-  const argsChecked=[];
-  args.forEach(value=>{
-    if(argCandidate===''){
-      if(value.slice(0,1)!==`'`) return argsChecked.push(value);
-      if(value.slice(0,1)===`'`&&value.slice(-1)===`'`) return argsChecked.push(value.slice(1,-1));
-      return argCandidate=value.slice(1);
-    }
-    if(value.slice(-1)!==`'`) return argCandidate+=' '+value;
-    argsChecked.push(argCandidate+' '+value.slice(0,-1));
-    return argCandidate='';
-  });
-  const myResult=spawnSync(exec,argsChecked,{encoding:'utf8'});
-  if(myResult.error) {
-    //@ts-ignore - TS may not have correct Node error signature
-    let errCause=myResult.error.code;
-    if(errCause==='ENOENT') errCause=`"${exec}" not found`;
-    throw Error(_brandMsg(`commonSpawn: commandline not executable: "${commandline}": ${errCause}`));
-  }
-  return {status:myResult.status,stderr:myResult.stderr.split(EOL),stdout:myResult.stdout.split(EOL)}
-}
+// /** Simplify Node's spawnSync call signature / return to its common usage
+//  *  - i.e. stdio encoding utf8 and passing a usual command line call divided by
+//  *    spaces into exec / args, returning an object with status / stdout /
+//  *    stderr of execution where stdout / stderr as arrays of strings instead of
+//  *    joined lines of strings for easier consumption
+//  *  - quoting with single or double quotes e.g. for arguments containing spaces
+//  *    is supported, but quoting quotes goes beyond "common"
+//  *  - NB: Bun's console.log introduces ANSI codes for CLI display, these are
+//  *    NOT part of the returned object itself
+//  * @example commonSpawn('git log --oneline -10')
+//  * @example commonSpawn('git commit -m "Some changes"')
+//  * @example commonSpawn("git commit -m 'Some changes'")
+//  * @param commandline - Progamm call with args as it would be given on command
+//  *    line
+//  * @returns - Object with status / stdout / stderr of cli run
+//  * @type {(commandline:string)=>{status:number|null,stderr:string[],stdout:string[]}}
+// */
+// export const commonSpawn=function(commandline){
+//   if(!commandline) throw Error(_brandMsg(`commonSpawn: Parameter "commandline" must be set`));
+//   if(typeof commandline!=='string') throw Error(_brandMsg(`commonSpawn: Parameter "commandline" must be a string`));
+//   // Normalize quotes for args with spaces: best compromise for Node vs. Bun
+//   const [exec, ...args]=commandline.replaceAll('"',"'").split(' ');
+//   for(let i=0; i<args.length; i++){
+//     if(['&&','||','|'].includes(args[i])) throw Error(_brandMsg(`commonSpawn: Operators like "${args[i]}" are not supported - try to combine multiple commonSpawn calls by JavaScript means`));
+//   }
+//   let argCandidate='';
+//   /** @type{string[]} */
+//   const argsChecked=[];
+//   args.forEach(value=>{
+//     if(argCandidate===''){
+//       if(value.slice(0,1)!==`'`) return argsChecked.push(value);
+//       if(value.slice(0,1)===`'`&&value.slice(-1)===`'`) return argsChecked.push(value.slice(1,-1));
+//       return argCandidate=value.slice(1);
+//     }
+//     if(value.slice(-1)!==`'`) return argCandidate+=' '+value;
+//     argsChecked.push(argCandidate+' '+value.slice(0,-1));
+//     return argCandidate='';
+//   });
+//   const myResult=spawnSync(exec,argsChecked,{encoding:'utf8'});
+//   if(myResult.error) {
+//     //@ts-ignore - TS may not have correct Node error signature
+//     let errCause=myResult.error.code;
+//     if(errCause==='ENOENT') errCause=`"${exec}" not found`;
+//     throw Error(_brandMsg(`commonSpawn: commandline not executable: "${commandline}": ${errCause}`));
+//   }
+//   return {status:myResult.status,stderr:myResult.stderr.split(EOL),stdout:myResult.stdout.split(EOL)}
+// }
 
 /** Check if stderr in the return of a commonSpawn() contains a given string
  * @example commonSpawnErrContains('did not match','git commit "wip"')
@@ -288,34 +288,6 @@ export const gitMockTag=function(settings){
 }
 
 export const headerDefault=testOnlyExports()?._settings.headerDefault;
-
-/** Formally an ISO date "yyyy-mm-dd"
- *  - ! not checking if possible real date, i.e not excluding february 30th
- */
-const isIsoDateNoTime=function(string=''){
-  if(!string) return false;
-  const myParts=string.split('-');
-  if(myParts.length!==3) return false;
-  /** @type{{[key:number]:number}} */
-  const fieldLengths={
-    0:4,
-    1:2,
-    2:2
-  }
-  /** @type{{[key:number]:number}} */
-  const maxVals={
-    1:12,
-    2:31
-  }
-  for(let i=0;i<myParts.length;i++){
-    if(myParts[i].length!==fieldLengths[i]) return false;
-    // @ts-ignore
-    if(isNaN(myParts[i])) return false;
-    if(parseInt(myParts[i])<1) return false;
-    if(Object.hasOwn(maxVals,i)&&parseInt(myParts[i])>maxVals[i]) return false;
-  }
-  return true;
-}
 
 /** Create new / modifiy existing package.json with given key value pairs
  *  - Explicitly without npm methods: should also be possible without an

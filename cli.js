@@ -16,6 +16,22 @@ let commitURI;
 let out;
 
 const progName='commits-to-changelog';
+const _progState={
+  dateGroups:{
+    when:'',
+    isodate:'',
+    _used:[''],
+    getHeader(date=''){
+      if(!isIsoDate(date)) throw Error(progName+': _progState.dateGroups.getHeader: Parameter "date": must be a valid ISO date');
+      if(this._used.includes(date)) return '';
+      if(!this.when) return '';
+      if(this.when==='after'&&new Date(date).valueOf()<=new Date(this.isodate).valueOf()) return '';
+      if(this.when==='before'&&new Date(date).valueOf()>=new Date(this.isodate).valueOf()) return '';
+      this._used.push(date);
+      return date;
+    }
+  }
+}
 
 /** Settings
  *  - Predefined values that may be overwritten via "commits-to-changelog" in
@@ -29,6 +45,8 @@ const _settings={
   headerDefault: 'Current',
   linesToReadme: 0,
   requireTag: true,
+  /** @type{undefined|false|string} */
+  useDateGroups: 'never',
   useNotes: true
 }
 
@@ -393,6 +411,29 @@ const _getSettings=function(){
   });
 }
 
+const _evalUseDateGroups=function(){
+  return new Promise((res, rej) => {
+    if(!_settings.useDateGroups) return res('true');
+    if(_settings.useDateGroups==='never') return res('true');
+    const settingDefault='never';
+    const settingAllowedNoDate=['never','always'];
+    if(settingAllowedNoDate.includes(_settings.useDateGroups)){
+      _progState.dateGroups.when=_settings.useDateGroups;
+      return res(true);
+    }
+    const settingAllowedWithDate=['after','before'];
+    if(!settingAllowedWithDate.includes(_settings.useDateGroups.split(':')[0])) throw Error(progName+`: Setting "useDateGroups" must be one of "${settingAllowedNoDate.concat(settingAllowedWithDate.map(value=>value+':<isodate>')).filter(value=>value!==settingDefault).join('" / "')}" / "${settingDefault}" (default)`);
+    _settings.useDateGroups.split(':').forEach(/**@type{(value:string,index:number)=>any}*/(value,index)=>{
+      if(index===0) _progState.dateGroups.when=value;
+      if(index===1) {
+        if(!isIsoDate(value)) throw Error(progName+': Setting "useDateGroups": "'+_settings.useDateGroups+'" does not contain a valid ISO date');
+        _progState.dateGroups.isodate=value;
+      }
+    });
+    res('true');
+  });
+}
+
 const _getCommitURI=function(){
   return new Promise((res, rej) => {
     let remoteRepoUrl;
@@ -425,6 +466,7 @@ if(process.argv[1].split(sep).slice(-1)[0]==='cli.js'){
     .then(_checkIfGitRepo)
     .then(_getPackageJson)
     .then(_getSettings)
+    .then(_evalUseDateGroups)
     .then(_getCommitURI)
     .then(getCommits)
     .then(splitCommits)
@@ -483,6 +525,7 @@ function formatCommits(commits) {
     let mergeCommitEnd = false;
     let tag=null;
     tag=refNames.split(', ').filter(value=>value.startsWith('tag: ')).map(value=>value.split('tag: ')[1]).sort().join(' / ');
+
     if(_settings.headerMerged&&parents.split(' ').length>1){
       mergeCommitStart = true;
       prevParent = parents.slice(0, parents.indexOf(" "));
@@ -579,8 +622,8 @@ function evalNewestCommits(formattedCommits) {
   return new Promise((res, rej) => {
     if (!formattedCommits[0].tag) {
       if(_settings.requireTag) throw Error(progName+': Untagged commit found (use setting "requireTag:false" to allow untagged commits)');
-      let header=_settings.headerDefault;
-      out+=EOL+'## ';
+      let header=_progState.dateGroups.getHeader(formattedCommits[0].date);
+      if(!header) header=_settings.headerDefault;
       if(pkg&&pkg.version&&_checkNonLabeledSemver(pkg.version)){
         const latestTag=spawnSync('git',['describe','--tags','--abbrev=0'],{encoding:'utf8'}).stdout.split(EOL)[0];
         if(latestTag&&_checkNonLabeledSemver(latestTag)){
@@ -588,19 +631,27 @@ function evalNewestCommits(formattedCommits) {
           if(pkg.version!==latestTag) header=pkg.version;
         }
       }
-      const groupDate=_settings.defaultDateToday?new Date().toISOString().slice(0,10):formattedCommits[0].date;
-      out+=`${header} (${groupDate})`+EOL+EOL;
+      out+=_mkGroupHeader(
+        header,
+        _settings.defaultDateToday?new Date().toISOString().slice(0,10):formattedCommits[0].date
+      );
     }
     res(formattedCommits);
   });
 }
 
+/** @type{(tag:string,date:string)=>string} */
+const _mkGroupHeader=function(header,date){
+  let myTitle=header!==date?`${header} (${date})`:`*${header}*`;
+  return EOL+`## ${myTitle}`+EOL+EOL;
+}
+
 /** @type{(formattedCommits:any[])=>Promise<boolean>} */
 function prepareOutput(formattedCommits) {
   formattedCommits.forEach(commit => {
-    if (commit.tag) {
-      out += EOL+`## ${commit.tag} (${commit.date})`+EOL+EOL;
-    }
+    let header=commit.tag?commit.tag:'';
+    if(!header) header=_progState.dateGroups.getHeader(commit.date);
+    if(header) out+=_mkGroupHeader(header,commit.date);
 
     for(const filter of _settings.filterCommits){
       if(new RegExp(filter).test(commit.subject)) return;
@@ -633,4 +684,80 @@ function save() {
       res(true);
     });
   });
+}
+
+/** Formally an ISO date "yyyy-mm-dd"
+ *  - ! not checking if possible real date, i.e not excluding february 30th etc.
+ */
+export const isIsoDate=function(string=''){
+  if(!string) return false;
+  const myParts=string.split('-');
+  if(myParts.length!==3) return false;
+  /** @type{{[key:number]:number}} */
+  const fieldLengths={
+    0:4,
+    1:2,
+    2:2
+  }
+  /** @type{{[key:number]:number}} */
+  const maxVals={
+    1:12,
+    2:31
+  }
+  for(let i=0;i<myParts.length;i++){
+    if(myParts[i].length!==fieldLengths[i]) return false;
+    // @ts-ignore
+    if(isNaN(myParts[i])) return false;
+    if(parseInt(myParts[i])<1) return false;
+    if(Object.hasOwn(maxVals,i)&&parseInt(myParts[i])>maxVals[i]) return false;
+  }
+  return true;
+}
+
+/** Simplify Node's spawnSync call signature / return to its common usage
+ *  - i.e. stdio encoding utf8 and passing a usual command line call divided by
+ *    spaces into exec / args, returning an object with status / stdout /
+ *    stderr of execution where stdout / stderr as arrays of strings instead of
+ *    joined lines of strings for easier consumption
+ *  - quoting with single or double quotes e.g. for arguments containing spaces
+ *    is supported, but quoting quotes goes beyond "common"
+ *  - NB: Bun's console.log introduces ANSI codes for CLI display, these are
+ *    NOT part of the returned object itself
+ * @example commonSpawn('git log --oneline -10')
+ * @example commonSpawn('git commit -m "Some changes"')
+ * @example commonSpawn("git commit -m 'Some changes'")
+ * @param commandline - Progamm call with args as it would be given on command
+ *    line
+ * @returns - Object with status / stdout / stderr of cli run
+ * @type {(commandline:string)=>{status:number|null,stderr:string[],stdout:string[]}}
+*/
+export const commonSpawn=function(commandline){
+  if(!commandline) throw Error(brandMsg(`commonSpawn: Parameter "commandline" must be set`));
+  if(typeof commandline!=='string') throw Error(brandMsg(`commonSpawn: Parameter "commandline" must be a string`));
+  // Normalize quotes for args with spaces: best compromise for Node vs. Bun
+  const [exec, ...args]=commandline.replaceAll('"',"'").split(' ');
+  for(let i=0; i<args.length; i++){
+    if(['&&','||','|'].includes(args[i])) throw Error(brandMsg(`commonSpawn: Operators like "${args[i]}" are not supported - try to combine multiple commonSpawn calls by JavaScript means`));
+  }
+  let argCandidate='';
+  /** @type{string[]} */
+  const argsChecked=[];
+  args.forEach(value=>{
+    if(argCandidate===''){
+      if(value.slice(0,1)!==`'`) return argsChecked.push(value);
+      if(value.slice(0,1)===`'`&&value.slice(-1)===`'`) return argsChecked.push(value.slice(1,-1));
+      return argCandidate=value.slice(1);
+    }
+    if(value.slice(-1)!==`'`) return argCandidate+=' '+value;
+    argsChecked.push(argCandidate+' '+value.slice(0,-1));
+    return argCandidate='';
+  });
+  const myResult=spawnSync(exec,argsChecked,{encoding:'utf8'});
+  if(myResult.error) {
+    //@ts-ignore - TS may not have correct Node error signature
+    let errCause=myResult.error.code;
+    if(errCause==='ENOENT') errCause=`"${exec}" not found`;
+    throw Error(brandMsg(`commonSpawn: commandline not executable: "${commandline}": ${errCause}`));
+  }
+  return {status:myResult.status,stderr:myResult.stderr.split(EOL),stdout:myResult.stdout.split(EOL)}
 }

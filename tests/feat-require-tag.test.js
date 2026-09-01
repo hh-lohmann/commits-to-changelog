@@ -17,7 +17,7 @@ suite('Feature: Depending on setting requireTag: Throw Error if commits without 
     _lib.rmDir(tstdir);
   });
 
-  test( 'Explicit requireTag=false => throw Error',()=> {
+  test( 'Explicit requireTag=false => no Error',()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
     _lib.gitMockCommit();
