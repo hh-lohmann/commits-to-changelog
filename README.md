@@ -175,7 +175,7 @@ where `# Changelog` is the **title**, a Markdown [atx heading](#commonmark-spec-
     * if no Git tag associated: an existing package.json version if this is [a non-labeled SemVer](#non-labeled-semver) and is newer than an existing previous tag that is also a non-labeled SemVer
     * if none of the above applies: the [headerDefault](#headerdefault) (see [Settings](#settings))
 
-so that the applicable Git tag / package.json version or the headerDefault becomes the `{groupheader}` that together with the date of the Git tag or else the current date constitutes a Markdown heading of level 2 under which **associated commits** are listed as
+so that the applicable Git tag / package.json version or the headerDefault becomes the `{groupheader}` that together with the date of the newest commit in the group constitutes a Markdown heading of level 2 under which **associated commits** are listed as
 
   * if a [Git remote *for the current branch*](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
   * if no Git remote is given: the subject of the commit only
