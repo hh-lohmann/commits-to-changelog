@@ -9,7 +9,7 @@ Create an unopionated CHANGELOG.md from Git commit history (see [Details](#detai
 * Optionally writes defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md (see [linesToReadme](#linestoreadme) under [Settings](#settings))
 * Commits that are rather not relevant for users, e.g. "bump version" / changelog" / "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be defined as values for the [setting](#settings) [filterCommits](#filtercommits)
   * I.e. no pressure to spoof commits or history to get a nice CHANGELOG
-* Does explicitly not do any magic based on things [Conventional Commits](#conventional-commits) to keep it compatible with less organized repos, but of course you should use commit conventions.
+* Does not require any elaborated organization of commits / repos but hopefully supports helpful concepts like [Flowing Code's Commit Message Guidelines](#flowing-code-commit-message-guidelines) (based on [Conventional Commits](#conventional-commits)), especially when transitioning given repos
 
 *[hh lohmann &lt;hh.lohmann@gmail.com&gt;](mailto:hh.lohmann@gmail.com?subject=commits-to-changelog)*
 
@@ -262,6 +262,9 @@ The (initial) code here is forked from [git-to-changelog](#git-to-changelog), an
 ### DokuWiki Changelog
   * Example for a special versiong scheme
   * <https://www.dokuwiki.org/changes>
+
+### Flowing Code: Commit Message Guidelines
+  * <https://github.com/FlowingCode/DevelopmentConventions/blob/main/conventional-commits.md>
 
 ### Git commmit subject
   * The first line of a commit message that is separated from the body of the message by an empty line (identical to the whole message if this have empty line)
