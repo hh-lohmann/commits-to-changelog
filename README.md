@@ -67,6 +67,10 @@ Default settings can be overwritten by key-value pairs in an object as value for
 
 ### Possible Settings
 
+#### defaultDateToday
+Boolean: If commits without tags are allowed (see [requireTag](#requiretag)): Use current date instead of commit date for grouping commits without tag
+  * Default: false
+
 #### filterCommits
 Array of RegExp: Filter out commits / commit types if commit message matches a RegExp in the array
   * Default: undefined
@@ -179,6 +183,8 @@ so that the applicable Git tag / package.json version or the headerDefault becom
 
   * if a [Git remote *for the current branch*](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
   * if no Git remote is given: the subject of the commit only
+
+If your workflow allows commits without tags (see [setting](#settings) [requireTag](#requiretag)) then you can opt with [setting](#settings) [defaultDateToday](#defaultdatetoday) to use the current date for commits without tags instead the newest commit's date .
 
 Git tags do not need to have any special structure or orderings, they could be natural numbers as well as SemVers, ISO dates, [CalVer](#calver), arbitrary names or any mixture like that used by [DokuWiki](#dokuwiki-changelog), they are generally just "tags" in the most verbatim sense, giving the information you may regard as helpful to track changes - the order in the CHANGELOG.md always depends on that of the listed Git commits, not on any tagging scheme. You may choose a scheme that allows to integrate a CHANGELOG.md creation into an overall workflow like setting first a non-labeled SemVer version in package.json and derive release tags from this (see above).
 

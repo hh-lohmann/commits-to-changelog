@@ -17,6 +17,16 @@ import {testOnlyExports} from '../cli.js';
 // @ts-ignore
 const _brandMsg=testOnlyExports().brandMsg;
 
+export const checkHeader=function(string='',header=headerDefault){
+  if(!string) return false;
+  const myParts=string.split('## '+header+' ');
+  if(myParts.length!==2||myParts[0]!=='') return false;
+  const datepart=myParts[1].match(/\([0-9]{4}-[0-9]{2}-[0-9]{2}\)/);
+  if(!datepart) return false;
+  if(!isIsoDateNoTime(datepart[0].slice(1,-1))) return false;
+  return true;
+}
+
 /** Simplify Node's spawnSync call signature / return to its common usage
  *  - i.e. stdio encoding utf8 and passing a usual command line call divided by
  *    spaces into exec / args, returning an object with status / stdout /
@@ -275,6 +285,36 @@ export const gitMockTag=function(settings){
   if(typeof settings?.tagname!=='string') throw Error(_brandMsg(`gitMockTag: Option "tagname" must be a string`));
   gitInitMock(settings.branch);
   commonSpawn('git tag '+settings.tagname);
+}
+
+export const headerDefault=testOnlyExports()?._settings.headerDefault;
+
+/** Formally an ISO date "yyyy-mm-dd"
+ *  - ! not checking if possible real date, i.e not excluding february 30th
+ */
+const isIsoDateNoTime=function(string=''){
+  if(!string) return false;
+  const myParts=string.split('-');
+  if(myParts.length!==3) return false;
+  /** @type{{[key:number]:number}} */
+  const fieldLengths={
+    0:4,
+    1:2,
+    2:2
+  }
+  /** @type{{[key:number]:number}} */
+  const maxVals={
+    1:12,
+    2:31
+  }
+  for(let i=0;i<myParts.length;i++){
+    if(myParts[i].length!==fieldLengths[i]) return false;
+    // @ts-ignore
+    if(isNaN(myParts[i])) return false;
+    if(parseInt(myParts[i])<1) return false;
+    if(Object.hasOwn(maxVals,i)&&parseInt(myParts[i])>maxVals[i]) return false;
+  }
+  return true;
 }
 
 /** Create new / modifiy existing package.json with given key value pairs

@@ -23,6 +23,7 @@ const progName='commits-to-changelog';
  * @type{{[key:string]:any}}
  */
 const _settings={
+  defaultDateToday: false,
   filterCommits:[],
   filterDefaults: true,
   headerDefault: 'Current',
@@ -584,21 +585,11 @@ function evalNewestCommits(formattedCommits) {
           if(pkg.version!==latestTag) header=pkg.version;
         }
       }
-      out+=`${header} (${getToday()})`+EOL+EOL;
+      const groupDate=_settings.defaultDateToday?new Date().toISOString().slice(0,10):formattedCommits[0].date;
+      out+=`${header} (${groupDate})`+EOL+EOL;
     }
     res(formattedCommits);
   });
-}
-
-function getToday() {
-  let date = new Date();
-
-  return `${date.getFullYear()}-${prepend0(date.getMonth() + 1)}-${prepend0(date.getDate())}`;
-}
-
-/** @type{(val:number)=>string|number} */
-function prepend0(val) {
-  return (val < 10 ? "0" + val : val);
 }
 
 /** @type{(formattedCommits:any[])=>Promise<boolean>} */
