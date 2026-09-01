@@ -8,7 +8,7 @@ test( 'Exit: Package version falls before latest tag',()=> {
   const tstdir=_lib.randomTmpDir();
   _lib.cd(tstdir);
   writeFileSync('package.json','{"version":"1.0.0","commits-to-changelog":{"requireTag":false}}');
-  _lib.gitMockRemote('htts://www.example.com');
+  _lib.gitMockRemote('https:///www.example.com');
   _lib.gitMockCommit();
   _lib.gitMockTag({tagname:'2.0.0'});
   _lib.gitMockCommit();

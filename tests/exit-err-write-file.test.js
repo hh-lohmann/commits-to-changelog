@@ -9,7 +9,7 @@ test( 'Exit: Error writing CHANGELOG.md file',()=> {
   const tstdir=_lib.randomTmpDir();
   _lib.cd(tstdir);
   writeFileSync('package.json','{"commits-to-changelog":{"requireTag":false}}');
-  _lib.gitMockRemote('htts://www.example.com');
+  _lib.gitMockRemote('https:///www.example.com');
   _lib.gitMockCommit();
   writeFileSync('CHANGELOG.md', 'mock', {mode:'444'});
   assert(_lib.commonSpawnErrContains(/.\/CHANGELOG.md/,_lib.runPkgCli()));

@@ -28,7 +28,8 @@ const _settings={
   filterDefaults: true,
   headerDefault: 'Current',
   linesToReadme: 0,
-  requireTag: true
+  requireTag: true,
+  useNotes: true
 }
 
 export const testOnlyExports=function(){
@@ -454,7 +455,9 @@ function checkArgs() {
 
 function getCommits() {
   return new Promise((res, rej) => {
-    exec("git log --topo-order --date=short --format=\"%cd~>%D~>%h~>%s~>%p\"", (err, commits) => {
+    let fields=['cd','D','h','s','p'];
+    if(_settings.useNotes) fields.push('N');
+    exec(`git log --topo-order --date=short --format="${fields.map(value=>'%'+value).join('~>')}"`, (err, commits) => {
       if (err) {
         return rej(err);
       }
@@ -466,7 +469,7 @@ function getCommits() {
 
 /** @type{(commits:string)=>Promise<string[]>} */
 function splitCommits(commits) {
-  return Promise.resolve(commits.trim().split(EOL));
+  return Promise.resolve(commits.trim().split(EOL).filter(value=>value!==''));
 }
 
 /** @type{(commits:string[])=>Promise<object[]>} */
@@ -475,9 +478,9 @@ function formatCommits(commits) {
   let prevParent;
 
   return Promise.resolve(commits.map(/**@type{(commit:string)=>Object}*/commit => {
-    let [date, refNames, hash, subject, parents] = commit.split("~>"),
-        mergeCommitStart = false,
-        mergeCommitEnd = false;
+    let [date, refNames, hash, subject, parents, notes] = commit.split("~>");
+    let mergeCommitStart = false;
+    let mergeCommitEnd = false;
     let tag=null;
     tag=refNames.split(', ').filter(value=>value.startsWith('tag: ')).map(value=>value.split('tag: ')[1]).sort().join(' / ');
     if(_settings.headerMerged&&parents.split(' ').length>1){
@@ -490,7 +493,7 @@ function formatCommits(commits) {
 
     subject = encodeHTML(subject);
 
-    return {date, tag, hash, subject, mergeCommitStart, mergeCommitEnd};
+    return {date, tag, hash, subject, mergeCommitStart, mergeCommitEnd, notes};
   }));
 }
 
@@ -612,6 +615,9 @@ function prepareOutput(formattedCommits) {
     } else {
       out += `- ${commit.subject}`+EOL;
     }
+
+    if(commit.notes) out+=`  - *Note:* ${commit.notes}`+EOL;
+
   });
 
   return Promise.resolve(true);

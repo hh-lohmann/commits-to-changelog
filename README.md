@@ -9,6 +9,7 @@ Create an unopionated CHANGELOG.md from Git commit history (see [Details](#detai
 * Optionally writes defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md (see [linesToReadme](#linestoreadme) under [Settings](#settings))
 * Commits that are rather not relevant for users, e.g. "bump version" / changelog" / "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be defined as values for the [setting](#settings) [filterCommits](#filtercommits)
   * I.e. no pressure to spoof commits or history to get a nice CHANGELOG
+* Displays also [Git notes](#git-notes) (if existing) see [setting](#settings) [useNotes](#usenotes) details and opting out
 * Does not require any elaborated organization of commits / repos but hopefully supports helpful concepts like [Flowing Code's Commit Message Guidelines](#flowing-code-commit-message-guidelines) (based on [Conventional Commits](#conventional-commits)), especially when transitioning given repos
 
 *[hh lohmann &lt;hh.lohmann@gmail.com&gt;](mailto:hh.lohmann@gmail.com?subject=commits-to-changelog)*
@@ -101,6 +102,11 @@ Reject creating a Changelog if commits without associated Git tag exist
   * Boolean, default: true
   * Meant to improve workflows where a tag marks a release version and untagged commits would be missing when deploying via release version tag
 
+#### useNotes
+Boolean: Display also [Git notes](#git-notes) (if existing)
+  * Default: true
+  * Existing notes will be printed under the commit they belong to as a subordinate list item with prefix "*Note:* " (`*Note:* `)
+  * In practice Git notes are rarely used (GitHub etc. and even Git itself support them only rudimentary) so that for most cases this setting should make no difference
 
 
 ## Returns
@@ -281,6 +287,9 @@ The (initial) code here is forked from [git-to-changelog](#git-to-changelog), an
 
 ### Git: lightweight vs. annotated tags
   * <https://git-scm.com/book/en/v2/Git-Basics-Tagging#_creating_tags>
+
+### Git notes
+  * <https://git-scm.com/docs/git-notes>
 
 ### Git: Working with Remotes: Showing Your Remotes
   * <https://git-scm.com/book/ms/v2/Git-Basics-Working-with-Remotes#_showing_your_remotes>
