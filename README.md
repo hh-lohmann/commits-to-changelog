@@ -90,7 +90,7 @@ String to use as header for listing commits that do not belong to a defined Git 
   * Default: "Current"
 
 #### linesToReadme
-Write defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md
+Number: Write defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md
   * Existing section content is overwritten
   * Short entry form with link to full CHANGELOG.md
   * If "0", false or undefined: Do not touch README.md (and a possibly existing section Changelog)
@@ -104,8 +104,8 @@ Boolean: Create CHANGELOG.md with [reference-style links / link references](#com
   * if false: use inline links
 
 #### requireTag
-Reject creating a Changelog if commits without associated Git tag exist
-  * Boolean, default: true
+Boolean: Reject creating a Changelog if commits without associated Git tag exist
+  * Default: true
   * Meant to improve workflows where a tag marks a release version and untagged commits would be missing when deploying via release version tag
 
 #### useDateGroups
@@ -296,7 +296,7 @@ Besides the existence and characteristics of Git tags, a possible package.json a
 >     - Include (results of) separate branch 'fix/unclear-error'
 >     ...
 >     ```
->     This feature is deprecated in version 2.2.0 and higher since tags "inside" a merged branch will act as "normal" group markers on the parent's level (i.e. breaking the aimed "subgrouping" of the merged commits). 
+>     This feature is deprecated in version 2.2.0 and higher since tags "inside" a merged branch will act as "normal" group markers on the parent's level (i.e. breaking the aimed "subgrouping" of the merged commits).
 >     * For backwards compatibility this feature can be re-enabled by setting `headerMerged` with a string value to be used as title line. Per default `headerMerged` is not set and merged commits will be displayed as normal commits.
 >     * It is strongly advised not to settle on this feature but instead to use (specially tailored) Git tags to group commits together
 
@@ -339,7 +339,7 @@ The (initial) code here is forked from [git-to-changelog](#git-to-changelog), an
 ### Flowing Code: Commit Message Guidelines
   * <https://github.com/FlowingCode/DevelopmentConventions/blob/main/conventional-commits.md>
 
-### Git commmit subject
+### Git commit subject
   * The first line of a commit message that is separated from the body of the message by an empty line (identical to the whole message if this have empty line)
   * cf. Git's example for a commit_template: <https://git-scm.com/book/en/v2/Customizing-Git-Git-Configuration#_commit_template>
 
