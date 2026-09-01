@@ -98,6 +98,11 @@ Write defined number of lines from the start of CHANGELOG.md also to an existing
   * Note: The value should be a positive integer, but for convenience also strings containing (only) a positive integer are accepted
   * Throws errors if greater "0" but no README.md or no section "Changelog" (case insensitive) was found in README.md
 
+#### referenceLinks
+Boolean: Create CHANGELOG.md with [reference-style links / link references](#commonmark-spec-link-reference-definitions) (see [Details](#details))
+  * Default: true
+  * if false: use inline links
+
 #### requireTag
 Reject creating a Changelog if commits without associated Git tag exist
   * Boolean, default: true
@@ -183,15 +188,23 @@ The resulting CHANGELOG.md has the simple structure
 
 ## {groupheader} ({date})
 
-- [{commit-subject}]({commit-link})
-- [{commit-subject}]({commit-link})
+- [{commit-subject}][{commit-hash}]
+- [{commit-subject}][{commit-hash}]
 
 ## {groupheader} ({date})
 
-- [{commit-subject}]({commit-link})
-- [{commit-subject}]({commit-link})
+- [{commit-subject}][{commit-hash}]
+- [{commit-subject}][{commit-hash}]
 
 (...)
+
+[{commit-hash}]: {commit-link}
+[{commit-hash}]: {commit-link}
+[{commit-hash}]: {commit-link}
+[{commit-hash}]: {commit-link}
+
+(...)
+
 ```
 
 where `# Changelog` is the **title**, a Markdown [atx heading](#commonmark-spec-atx-headings) (i.e. using "#") of level 1 with the text "Changelog", followed by an empty line, and lists of commits that are **grouped** by
@@ -204,8 +217,9 @@ where `# Changelog` is the **title**, a Markdown [atx heading](#commonmark-spec-
 
 so that the applicable Git tag / package.json version or the headerDefault becomes the `{groupheader}` that together with the date of the newest commit in the group constitutes a Markdown heading of level 2 under which **associated commits** are listed as
 
-  * if a [Git remote *for the current branch*](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}]({commit-link})` formed by the [subject](#git-commmit-subject) of the commit and the remote entry for the commit what is usually a page including a [Git diff](#git-diff) for the commit
-  * if no Git remote is given: the subject of the commit only
+  * if a [Git remote *for the current branch*](#git-working-with-remotes-showing-your-remotes) is given: a link `[{commit-subject}][{commit-hash}]`, i.e. the [subject of the commit message](#git-commit-subject) and the commit's hash as a label for a [link reference](#commonmark-spec-link-reference-definitions) to be listed at the end of the file with a `{commit-link}` to the remote entry for the commit that is usually a webpage showing the full commit message (i.e. the subject and possible further contents) and [diff](#git-diff) for the commit
+    * To use inline links instead of link references, i.e. directly `(#{commit-link})` in the commit line and no link reference list at the end of the file, set `false` for [setting](#settings) [referenceLinks](#referencelinks). Note that this affects only a non-rendered view of CHANGELOG.md, for rendered Markdown this will make no difference.
+  * if no Git remote is given: the subject of the commit message only, no link label list at end
 
 If your workflow allows commits without tags (see [setting](#settings) [requireTag](#requiretag)) then you can opt with [setting](#settings) [defaultDateToday](#defaultdatetoday) to use the current date for commits without tags instead the newest commit's date.
 
@@ -216,15 +230,23 @@ With [setting](#settings) [useDateGroups](#usedategroups) you can additionally g
 
 ## {groupheader} ({date})
 
-- [{commit-subject}]({commit-link})
-- [{commit-subject}]({commit-link})
+- [{commit-subject}][{commit-hash}]
+- [{commit-subject}][{commit-hash}]
 
 ## *{date}*
 
-- [{commit-subject}]({commit-link})
-- [{commit-subject}]({commit-link})
+- [{commit-subject}][{commit-hash}]
+- [{commit-subject}][{commit-hash}]
 
 (...)
+
+[{commit-hash}]: {commit-link}
+[{commit-hash}]: {commit-link}
+[{commit-hash}]: {commit-link}
+[{commit-hash}]: {commit-link}
+
+(...)
+
 ```
 
 Git tags do not need to have any special structure or orderings, they could be natural numbers as well as SemVers, ISO dates, [CalVer](#calver), arbitrary names or any mixture like that used by [DokuWiki](#dokuwiki-changelog), they are generally just "tags" in the most verbatim sense, giving the information you may regard as helpful to track changes - the order in the CHANGELOG.md always depends on that of the listed Git commits, not on any tagging scheme. You may choose a scheme that allows to integrate a CHANGELOG.md creation into an overall workflow like setting first a non-labeled SemVer version in package.json and derive release tags from this (see above).
@@ -302,6 +324,10 @@ The (initial) code here is forked from [git-to-changelog](#git-to-changelog), an
 
 ### CommonMark Spec: ATX headings
   * <https://spec.commonmark.org/0.31.2/#atx-headings>
+
+### CommonMark Spec: Link reference definitions
+  * Note: the original Markdown term is "reference-style links"
+  * <https://spec.commonmark.org/0.31.2/#link-reference-definitions>
 
 ### Conventional Commits
   * <https://www.conventionalcommits.org>

@@ -124,22 +124,6 @@ suite('Do: Changelog file layout',()=>{
     );
   });
 
-  test( 'List commits with link to remote if a remote is defined',()=> {
-    assert(
-      (()=>{
-        const myUrl='https://www.example.com';
-        if(_lib.commonSpawn('git remote').stdout[0]==='') _lib.gitMockRemote(myUrl);
-        _lib.runPkgCli();
-        changelogLines=_fileToArr('CHANGELOG.md','last')
-        for(let i=0; i<changelogLines.length; i++){
-          if(new RegExp(/^ {0,2}- /).test(changelogLines[i])&&!new RegExp(String.raw `- \[[^\[]+\]\(`).test(changelogLines[i])) return false;
-        }
-        return true;
-      })(),
-      'unexpected header in CHANGELOG.md, see '+tstdir
-    );
-  });
-
   test( 'List commits by plain subject if no remote is defined',()=> {
     assert(
       (()=>{

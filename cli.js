@@ -30,6 +30,21 @@ const _progState={
       this._used.push(date);
       return date;
     }
+  },
+  referenceLinks:{
+    /** @type{{[key:string]:string}} */
+    _list:{},
+    /** @type{(label:string,link:string)=>any} */
+    add(label='',link=''){
+      if(typeof label!=='string') throw Error(progName+': _progState.referenceLinks.add: Parameter "label": must be a string');
+      if(typeof link!=='string') throw Error(progName+': _progState.referenceLinks.add: Parameter "link": must be a string');
+      if(this._list.hasOwnProperty(label)) return;
+      this._list[label]=link;
+    },
+    /** @type{()=>string} */
+    getDefList(){
+      return Object.keys(this._list).map(value=>`[${value}]: ${this._list[value]}`).join(EOL);
+    }
   }
 }
 
@@ -44,6 +59,7 @@ const _settings={
   filterDefaults: true,
   headerDefault: 'Current',
   linesToReadme: 0,
+  referenceLinks: true,
   requireTag: true,
   /** @type{undefined|false|string} */
   useDateGroups: 'never',
@@ -646,6 +662,13 @@ const _mkGroupHeader=function(header,date){
   return EOL+`## ${myTitle}`+EOL+EOL;
 }
 
+/** @type{(subject:string,hash:string)=>string} */
+const _mkCommitLink=function(subject,hash){
+  if(!_settings.referenceLinks) return `[${subject}](${commitURI + hash})`;
+  _progState.referenceLinks.add(hash,commitURI + hash);
+  return `[${subject}][${hash}]`;
+}
+
 /** @type{(formattedCommits:any[])=>Promise<boolean>} */
 function prepareOutput(formattedCommits) {
   formattedCommits.forEach(commit => {
@@ -662,7 +685,7 @@ function prepareOutput(formattedCommits) {
     }
 
     if (commitURI) {
-      out += `- [${commit.subject}](${commitURI + commit.hash})`+EOL;
+      out += '- '+_mkCommitLink(commit.subject,commit.hash)+EOL;
     } else {
       out += `- ${commit.subject}`+EOL;
     }
@@ -670,6 +693,8 @@ function prepareOutput(formattedCommits) {
     if(commit.notes) out+=`  - *Note:* ${commit.notes}`+EOL;
 
   });
+
+  if(_settings.referenceLinks) out+=EOL+EOL+_progState.referenceLinks.getDefList()+EOL;
 
   return Promise.resolve(true);
 }
