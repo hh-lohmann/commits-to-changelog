@@ -1,5 +1,20 @@
 # Changelog
 
+## 2.2.2 (2026-09-01)
+
+- [README: Clarify: Independent of special commit conventions](https://github.com/hh-lohmann/commits-to-changelog/commit/8393cb6)
+- [README: Fix: Description of used date (commit date)](https://github.com/hh-lohmann/commits-to-changelog/commit/58ecc19)
+
+## 2.2.1 (2026-08-26)
+
+- [Fix: Handling RegExp in settings, especially flags](https://github.com/hh-lohmann/commits-to-changelog/commit/68f67a8)
+
+## 2.2.0 (2026-08-26)
+
+- [Deprecate: "Merged Branches" (intentional "no-ff" merges)](https://github.com/hh-lohmann/commits-to-changelog/commit/d905fc2)
+- [README: Clarify: Any kind of tag naming possible](https://github.com/hh-lohmann/commits-to-changelog/commit/325d502)
+- [README: clarify special handling for merged branches](https://github.com/hh-lohmann/commits-to-changelog/commit/3ccd7eb)
+
 ## 2.1.0 (2026-08-22)
 
 - [README: Clarify: Git remote must be defined for current branch to be used](https://github.com/hh-lohmann/commits-to-changelog/commit/be7b6ec)
