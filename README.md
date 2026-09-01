@@ -4,7 +4,7 @@
 
 Create an unopionated CHANGELOG.md from Git commit history (see [Details](#details))
 
-* Rejects by default creating a Changelog if commits without associated Git tag exist, untagged commits can be allowed via [setting](#settings) [requireTag](#requiretag)
+* Refuses by default if commits exist that are newer than the newest tag (i.e. imposing release tags), "untagged" commits can be allowed by negating the [setting](#settings) [requireTag](#requiretag)
 * Creates CHANGELOG.md on each run from scratch, i.e. an existing on will be overwritten
 * Optionally writes defined number of lines from the start of CHANGELOG.md also to an existing section with heading "Changelog" (or "CHANGELOG" or any preferred case) in README.md (see [linesToReadme](#linestoreadme) under [Settings](#settings))
 * Commits that are rather not relevant for users, e.g. "bump version" / changelog" / "tests" (full list see [filterDefaults](#filterdefaults) under [settings](#settings)), are filtered out by default, further commits / commit types to filter out can be defined as values for the [setting](#settings) [filterCommits](#filtercommits)
