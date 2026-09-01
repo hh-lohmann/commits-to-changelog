@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.0 (2026-09-01)
+
+- [Feature: Support Git notes](https://github.com/hh-lohmann/commits-to-changelog/commit/8e56011)
+
 ## 2.3.0 (2026-09-01)
 
 - [Feature: Use commit date as group date if no tag is given (opt with setting to "current date")](https://github.com/hh-lohmann/commits-to-changelog/commit/67ee0b3)
@@ -22,6 +26,7 @@
 ## 2.1.0 (2026-08-22)
 
 - [README: Clarify: Git remote must be defined for current branch to be used](https://github.com/hh-lohmann/commits-to-changelog/commit/be7b6ec)
+  - *Note:* **! Wrong commit message (not changeable): Must be "*README: Git tags: No dfference for lightweight vs. annotated branches*"**
 - [Feature: Support multiple tags on the same commit](https://github.com/hh-lohmann/commits-to-changelog/commit/5677df6)
 
 ## 2.0.1 (2026-08-22)
