@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.4.1 (2026-09-01)
+
+- [README: wording](https://github.com/hh-lohmann/commits-to-changelog/commit/630785a)
+
 ## 2.4.0 (2026-09-01)
 
 - [Feature: Support Git notes](https://github.com/hh-lohmann/commits-to-changelog/commit/8e56011)
