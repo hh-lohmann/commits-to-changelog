@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.0 (2026-09-01)
+
+- [Feature: Use commit date to group commits (additionally to tags)](https://github.com/hh-lohmann/commits-to-changelog/commit/a74b4b0)
+
 ## 2.4.1 (2026-09-01)
 
 - [README: wording](https://github.com/hh-lohmann/commits-to-changelog/commit/630785a)
