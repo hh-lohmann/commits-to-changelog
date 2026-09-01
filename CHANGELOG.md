@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.1 (2026-09-01)
+
+- [README wording, typos][31dda8d]
+
 ## 2.6.0 (2026-09-01)
 
 - [Feature: Print commit links as Markdown reference-style links][d98596a]
@@ -121,6 +125,7 @@
 - [Fork from git-to-changelog with fix hardwired path '../../package.json' to process.cwd()+'/package.json'][957d477]
 
 
+[31dda8d]: https://github.com/hh-lohmann/commits-to-changelog/commit/31dda8d
 [d98596a]: https://github.com/hh-lohmann/commits-to-changelog/commit/d98596a
 [a74b4b0]: https://github.com/hh-lohmann/commits-to-changelog/commit/a74b4b0
 [630785a]: https://github.com/hh-lohmann/commits-to-changelog/commit/630785a
