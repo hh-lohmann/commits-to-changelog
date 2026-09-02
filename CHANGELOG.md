@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1 (2026-09-02)
+
+- [Fix: Catch wrong setting type][cd82f4b]
+
 ## 3.0.0 (2026-09-02)
 
 - [Feature: Auto-commit CHANGELOG.md and move tag to include CHANGELOG.md in the tag's range (opt-out by setting)][91b3f7f]
@@ -133,6 +137,7 @@
 - [Fork from git-to-changelog with fix hardwired path '../../package.json' to process.cwd()+'/package.json'][957d477]
 
 
+[cd82f4b]: https://github.com/hh-lohmann/commits-to-changelog/commit/cd82f4b
 [91b3f7f]: https://github.com/hh-lohmann/commits-to-changelog/commit/91b3f7f
 [8761a07]: https://github.com/hh-lohmann/commits-to-changelog/commit/8761a07
 [31dda8d]: https://github.com/hh-lohmann/commits-to-changelog/commit/31dda8d
