@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.2 (2026-09-02)
+
+- [README: Update example for multiple Git tags][2b3497e]
+
 ## 2.6.1 (2026-09-01)
 
 - [README wording, typos][31dda8d]
@@ -125,6 +129,7 @@
 - [Fork from git-to-changelog with fix hardwired path '../../package.json' to process.cwd()+'/package.json'][957d477]
 
 
+[2b3497e]: https://github.com/hh-lohmann/commits-to-changelog/commit/2b3497e
 [31dda8d]: https://github.com/hh-lohmann/commits-to-changelog/commit/31dda8d
 [d98596a]: https://github.com/hh-lohmann/commits-to-changelog/commit/d98596a
 [a74b4b0]: https://github.com/hh-lohmann/commits-to-changelog/commit/a74b4b0
