@@ -17,6 +17,7 @@ let out;
 
 const progName='commits-to-changelog';
 const _progState={
+  commitMoveTag:{tag:''},
   dateGroups:{
     when:'',
     isodate:'',
@@ -61,6 +62,7 @@ const _settings={
   linesToReadme: 0,
   referenceLinks: true,
   requireTag: true,
+  commitMoveTag: true,
   /** @type{undefined|false|string} */
   useDateGroups: 'never',
   useNotes: true
@@ -477,6 +479,37 @@ const _errConsole=function(err){
   console.log();
 }
 
+const _commitMoveTagCheck=function(){
+  return new Promise((res,rej)=>{
+    if(!_settings.commitMoveTag) return res(true);
+    if(!_settings.requireTag) return rej(Error(progName+': _commitMoveTagCheck: Setting "requireTag" must be `true` to move tag'));
+    const myLogCallResult=commonSpawn('git log -1 --format="%D"');
+    if(myLogCallResult.status!==0) return rej(Error(progName+': _commitMoveTagCheck: Could not get tag for current commit'));
+    let myTags=myLogCallResult.stdout[0].replaceAll("'",'').split(', ').filter(value=>value.startsWith('tag: ')).map(value=>value.split('tag: ')[1]); 
+    if(myTags.length>1) return rej(Error(progName+': _commitMoveTagCheck: More than one tag found for current commit - no automated handling possible'));
+    _progState.commitMoveTag.tag=myTags[0];
+    return res(true);
+  })
+}
+
+const _commitMoveTag=function(){
+  return new Promise((res,rej)=>{
+    if(!_settings.commitMoveTag) return res(true);
+    if(commonSpawn('git status -s').stdout.filter(value=>value.includes('CHANGELOG.md')).length===0) return res(true);
+    const myBatch=[];
+    myBatch.push(`git tag -d ${_progState.commitMoveTag.tag}`);
+    myBatch.push(`git add CHANGELOG.md`);
+    if(existsSync('README.md')) myBatch.push(`git add README.md`);
+    myBatch.push(`git commit -m "changelog"`);
+    myBatch.push(`git tag ${_progState.commitMoveTag.tag}`);
+    for(let i=0;i<myBatch.length;i++){
+      const myResult=commonSpawn(myBatch[i]);
+      if(myResult.status!==0) return rej(Error(progName+': _commitMoveTag: Could not commit CHANGELOG.md / move tag for current commit: '+myResult.stderr.join(EOL)));
+    }
+    return res(true);
+  })
+}
+
 if(process.argv[1].split(sep).slice(-1)[0]==='cli.js'){
   checkArgs()
     .then(_checkIfGitRepo)
@@ -487,8 +520,8 @@ if(process.argv[1].split(sep).slice(-1)[0]==='cli.js'){
     .then(getCommits)
     .then(splitCommits)
     .then(formatCommits)
-    .then((res)=>{
-      _linesToReadme(res)
+    .then(async(res)=>{
+      await _linesToReadme(res)
       .catch(err=>_errConsole(err));
       return res;
     })
@@ -496,7 +529,9 @@ if(process.argv[1].split(sep).slice(-1)[0]==='cli.js'){
     .then(setHeader)
     .then(evalNewestCommits)
     .then(prepareOutput)
+    .then(_commitMoveTagCheck)
     .then(save)
+    .then(_commitMoveTag)
     .catch(err => {
       _errConsole(err);
       process.exit(1);

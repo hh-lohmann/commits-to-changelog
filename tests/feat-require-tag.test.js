@@ -10,6 +10,7 @@ suite('Feature: Depending on setting requireTag: Throw Error if commits without 
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
     _lib.gitMockCommit();
+    writeFileSync('package.json','{"commits-to-changelog":{"commitMoveTag":false}}');
     assert(
       _lib.commonSpawnErrContains('Untagged commit found',_lib.runPkgCli()),
       'see '+tstdir
@@ -21,7 +22,7 @@ suite('Feature: Depending on setting requireTag: Throw Error if commits without 
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
     _lib.gitMockCommit();
-    writeFileSync('package.json','{"commits-to-changelog":{"requireTag":false}}');
+    writeFileSync('package.json','{"commits-to-changelog":{"commitMoveTag":false,"requireTag":false}}');
     assert(
       _lib.runPkgCli().status===0,
       'see '+tstdir

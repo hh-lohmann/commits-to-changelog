@@ -18,7 +18,7 @@ suite('Feature: Use date of commit as group date also if no tag is given (modulo
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
     mkMockRepoCommits_2022_02_22(tstdir);
-    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"requireTag":false}}');
+    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"commitMoveTag":false,"requireTag":false}}');
     _lib.runPkgCli();
     assert(
        await _lib.getFirstHeader()===`## ${_lib.headerDefault} (2022-02-22)`,
@@ -31,7 +31,7 @@ suite('Feature: Use date of commit as group date also if no tag is given (modulo
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
     mkMockRepoCommits_2022_02_22(tstdir);
-    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"requireTag":false,"defaultDateToday":true}}');
+    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"commitMoveTag":false,"requireTag":false,"defaultDateToday":true}}');
     _lib.runPkgCli();
     assert(
        await _lib.getFirstHeader()===`## ${_lib.headerDefault} (${new Date().toISOString().slice(0,10)})`,

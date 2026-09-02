@@ -7,7 +7,7 @@ import {writeFileSync} from 'node:fs';
 test('Feature: Allow to have no package.json version',()=>{
   const tstdir=_lib.randomTmpDir();
   _lib.cd(tstdir);
-  writeFileSync('package.json','{"commits-to-changelog":{"requireTag":false}}');
+  writeFileSync('package.json','{"commits-to-changelog":{"commitMoveTag":false,"requireTag":false}}');
   _lib.gitMockCommit();
   ;
   assert(

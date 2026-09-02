@@ -34,6 +34,7 @@ suite('Feature: Print commit links as Markdown reference-style links',()=>{
   test( 'referenceLinks:[default:true] => reference-style links',()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
+    writeFileSync('package.json','{"commits-to-changelog":{"commitMoveTag":false}}');
     _lib.gitMockRemote(myRemote);
     _lib.gitMockCommit({msg:'mock'});
     _lib.gitMockTag({tagname:'mock'});
@@ -48,7 +49,7 @@ suite('Feature: Print commit links as Markdown reference-style links',()=>{
   test( 'referenceLinks:false => inline links',()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
-    writeFileSync('package.json','{"commits-to-changelog":{"referenceLinks": false}}');
+    writeFileSync('package.json','{"commits-to-changelog":{"commitMoveTag":false,"referenceLinks": false}}');
     _lib.gitMockRemote(myRemote);
     _lib.gitMockCommit({msg:'mock'});
     _lib.gitMockTag({tagname:'mock'});

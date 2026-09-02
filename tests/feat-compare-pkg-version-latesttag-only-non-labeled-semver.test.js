@@ -9,7 +9,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible _lib.headerD
   test( 'pkg.version and latestTag are both non-labeled semver, pkg.version is newer => header=pkg.version',async()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
-    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"requireTag":false}}');
+    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"commitMoveTag":false,"requireTag":false}}');
     _lib.gitMockCommit();
     _lib.gitMockTag({tagname:'1.0.0'});
     _lib.gitMockCommit();
@@ -24,7 +24,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible _lib.headerD
   test( `pkg.version is not a non-labeled semver => _settings._lib.headerDefault (current: "${_lib.headerDefault}")`,async()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
-    writeFileSync('package.json','{"version":"2.0.0-dev","commits-to-changelog":{"requireTag":false}}');
+    writeFileSync('package.json','{"version":"2.0.0-dev","commits-to-changelog":{"commitMoveTag":false,"requireTag":false}}');
     _lib.gitMockCommit();
     _lib.gitMockTag({tagname:'1.0.0'});
     _lib.gitMockCommit();
@@ -39,7 +39,7 @@ suite('Feature: Compare pkg.version and latestTag only for possible _lib.headerD
   test( `lastTag is not a non-labeled semver =>  _settings._lib.headerDefault (current: "${_lib.headerDefault}")`,async()=> {
     const tstdir=_lib.randomTmpDir();
     _lib.cd(tstdir);
-    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"requireTag":false}}');
+    writeFileSync('package.json','{"version":"2.0.0","commits-to-changelog":{"commitMoveTag":false,"requireTag":false}}');
     _lib.gitMockCommit();
     _lib.gitMockTag({tagname:'1.0.0-dev'});
     _lib.gitMockCommit();

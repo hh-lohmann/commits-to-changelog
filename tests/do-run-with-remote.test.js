@@ -7,7 +7,7 @@ import {writeFileSync} from 'node:fs';
 test( 'Do: Run with defined remote',()=> {
   const tstdir=_lib.randomTmpDir();
   _lib.cd(tstdir);
-  writeFileSync('package.json','{"commits-to-changelog":{"requireTag":false}}');
+  writeFileSync('package.json','{"commits-to-changelog":{"commitMoveTag":false,"requireTag":false}}');
   _lib.gitMockRemote('https://www.example.com');
   _lib.gitMockCommit();
   assert(_lib.runPkgCli().status===0);
