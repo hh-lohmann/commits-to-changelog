@@ -440,7 +440,7 @@ const _evalUseDateGroups=function(){
       return res(true);
     }
     const settingAllowedWithDate=['after','before'];
-    if(!settingAllowedWithDate.includes(_settings.useDateGroups.split(':')[0])) throw Error(progName+`: Setting "useDateGroups" must be one of "${settingAllowedNoDate.concat(settingAllowedWithDate.map(value=>value+':<isodate>')).filter(value=>value!==settingDefault).join('" / "')}" / "${settingDefault}" (default)`);
+    if(typeof _settings.useDateGroups!=='string'||!settingAllowedWithDate.includes(_settings.useDateGroups.split(':')[0])) throw Error(progName+`: Setting "useDateGroups" must be one of "${settingAllowedNoDate.concat(settingAllowedWithDate.map(value=>value+':<isodate>')).filter(value=>value!==settingDefault).join('" / "')}" / "${settingDefault}" (default)`);
     _settings.useDateGroups.split(':').forEach(/**@type{(value:string,index:number)=>any}*/(value,index)=>{
       if(index===0) _progState.dateGroups.when=value;
       if(index===1) {
